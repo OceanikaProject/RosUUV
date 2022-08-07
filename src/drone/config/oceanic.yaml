@@ -1,0 +1,12 @@
+motor_order1: 3
+motor_order2: -4
+motor_order3: 1
+motor_order4: -2
+motor_order5: 5
+motor_order6: 6
+coef_front_back: 1
+pitch_resist_coef: 50
+up_down_power_coef: 1
+coef_forward: 1
+coef_up: 1
+coef_turn: 1

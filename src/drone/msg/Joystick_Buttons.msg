@@ -1,0 +1,10 @@
+uint8 A
+uint8 B
+uint8 C
+uint8 D
+uint8 Lsw
+uint8 Rsw
+uint8 HOLD
+uint8 LED
+uint8 L
+uint8 R

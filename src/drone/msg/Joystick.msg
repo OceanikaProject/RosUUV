@@ -1,0 +1,12 @@
+std_msgs/Header header
+uint16 left_y
+uint16 left_x
+uint16 right_y
+uint16 right_x
+uint16 Battery
+uint8 State
+uint8 SpeedMode
+uint8 LightMode
+Joystick_Buttons Short
+Joystick_Buttons Long
+uint16 pressed_buttons
