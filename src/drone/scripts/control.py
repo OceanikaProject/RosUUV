@@ -60,7 +60,7 @@ class Control:
         self.powers_msg = Powers()
         self.power_hand = Int16()
         # rospy.Subscriber("esp", Joystick, self.control_callback)
-        joystick_subscriber = message_filters.Subscriber("joystick_node", Joystick)
+        joystick_subscriber = message_filters.Subscriber("joystick_state", Joystick)
         navigation_subscriber = message_filters.Subscriber("talker_topic", PoseStamped)
         self.ts = message_filters.TimeSynchronizer([joystick_subscriber, navigation_subscriber], 10)
         self.ts.registerCallback(self.control_callback)
@@ -124,6 +124,7 @@ class Control:
 
         stabilization_on = not (joystick_msg.State & 0b00000001)
         self.powers_msg.lock = (joystick_msg.State & 0b00000010) >> 1
+        self.serial_frame["data"][6] = self.powers_msg.lock
         yaw_on = (joystick_msg.State & 0b00001000) >> 3
         tangage_on = (joystick_msg.State & 0b00010000) >> 4
 
@@ -207,16 +208,33 @@ class Control:
         self.serial_frame["data"][2] = left_heading_pwm
         self.serial_frame["data"][3] = right_heading_pwm
 
+        self.serial_frame["data"][0] = int(self.serial_frame["data"][0])
+        self.serial_frame["data"][1] = int(self.serial_frame["data"][1])
+        self.serial_frame["data"][2] = int(self.serial_frame["data"][2])
+        self.serial_frame["data"][3] = int(self.serial_frame["data"][3])
+        self.serial_frame["data"][4] = int(self.serial_frame["data"][4])
+
         self.t = rospy.Time.now()
 
     def run(self):
         rate = rospy.Rate(10)
         while not rospy.is_shutdown():
+            self.serial_frame["crc"] = 0
+            for i in range(self.serial_frame["len"]):
+                
+                self.serial_frame["crc"] = self.serial_frame["crc"] ^ (int(self.serial_frame["data"][i]) & 0b11111111)
             msg = struct.pack(
-                "11B",
+                "2B8b1B",
                 self.serial_frame["header"],
                 self.serial_frame["len"],
-                *self.serial_frame["data"],
+                self.serial_frame["data"][0],
+                self.serial_frame["data"][1],
+                self.serial_frame["data"][2],
+                self.serial_frame["data"][3],
+                self.serial_frame["data"][4],
+                self.serial_frame["data"][5],
+                self.serial_frame["data"][6],
+                self.serial_frame["data"][7],
                 self.serial_frame["crc"]
             )
             self.arduino.write(msg)

@@ -4,16 +4,12 @@
  #include <WProgram.h>
 #endif
 
-//#include <ros.h>
-
 #include <Servo.h>
-//
-//
-//const uint8_t engines_quantity = 5;
-//const uint8_t pwm_pins[engines_quantity] = {3, 5, 6, 9, 10};
-//int8_t powers[engines_quantity] = {0, 0, 0, 0, 0};
-//Servo engines[engines_quantity];
-//Servo light;
+
+
+const uint8_t engines_quantity = 5;
+const uint8_t pwm_pins[engines_quantity] = {3, 5, 6, 9, 10};
+Servo engines[engines_quantity];
 
 enum {
   HEAD_ST,
@@ -33,11 +29,11 @@ struct Packet
 
 struct PowersPacket
 {
-  uint8_t left_alt_power;
-  uint8_t right_alt_power;
-  uint8_t left_heading_power;
-  uint8_t right_heading_power;
-  uint8_t back_alt_power;
+  uint16_t left_alt_power;
+  uint16_t right_alt_power;
+  uint16_t left_heading_power;
+  uint16_t right_heading_power;
+  uint16_t back_alt_power;
   uint8_t light;
   bool lock;
 } powers;
@@ -78,7 +74,7 @@ int parseByte(char byteIn)
         {
 //          Serial.print(lenGet); Serial.print(" "); Serial.println(pack.len - 1, HEX);
           pack.data[lenGet] = byteIn;
-          crc += byteIn;
+          crc ^= byteIn;
         }
         if (lenGet == pack.len - 1)
         {
@@ -138,28 +134,51 @@ void printPowers()
 void setup()
 {
     Serial.begin(9600);
+    pinMode(11, 0);
 }
 
 void loop()
 {
   if (Serial.available())
   {
-//    Serial.println("incomming msg");
+    Serial.println("incomming msg");
     while (Serial.available() > 0)
     {
       int ret = parseByte(Serial.read());
       if (ret == 1)
       {
-        powers.left_alt_power = pack.data[0];
-        powers.right_alt_power = pack.data[1];
-        powers.left_heading_power = pack.data[2];
-        powers.right_heading_power = pack.data[3];
-        powers.back_alt_power = pack.data[4];
+        powers.left_alt_power = map(pack.data[0], -100, 100, 1148, 1832);
+	powers.right_alt_power = map(pack.data[1], -100, 100, 1148, 1832);
+	powers.left_heading_power = map(pack.data[2], -100, 100, 1148, 1832);
+        powers.right_heading_power = map(pack.data[3], -100, 100, 1148, 1832);
+        powers.back_alt_power = map(pack.data[4], -100, 100, 1148, 1832);
         powers.light = pack.data[5];
         powers.lock = (bool) pack.data[6];
         printPowers();
       }
+
+      if (!powers.lock)
+      {
+	for (uint8_t i = 0; i < engines_quantity; i++)
+	{
+	  engines[i].attach(pwm_pins[i], 1148, 1832);
+	}
+      }
+      else
+      {
+	for (uint8_t i = 0; i < engines_quantity; i++)
+	{
+	  engines[i].detach();
+	}
+      }
+
+      engines[0].write(powers.left_alt_power);
+      engines[1].write(powers.right_alt_power);
+      engines[2].write(powers.left_heading_power);
+      engines[3].write(powers.right_heading_power);
+      engines[4].write(powers.back_alt_power);
+      analogWrite(11, powers.light);
     }
   }
-  delay(20);
+  delay(100);
 }

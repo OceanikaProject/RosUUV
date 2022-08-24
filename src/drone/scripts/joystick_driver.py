@@ -5,7 +5,7 @@ import socket
 
 
 class JoystickRepeater:
-    ROS_IP = "192.168.1.114"
+    ROS_IP = "192.168.1.84"
     PORT = 1234
 
     def __init__(self):
@@ -16,7 +16,7 @@ class JoystickRepeater:
 
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.bind(("192.168.1.114", 1234))
+        self.sock.bind(("192.168.1.84", 1234))
 
     def parse(self, esp8266_data):
         print(esp8266_data[0])
@@ -78,6 +78,7 @@ class JoystickRepeater:
             data = [byte for byte in data]
             print(data)
             if self.parse(data):
+                print("PARSED")
                 self.pub.publish(self.msg)
             rate.sleep()
 

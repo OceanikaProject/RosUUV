@@ -125,22 +125,22 @@ include_directories(
 )
 
 ## Declare a C++ library
-add_library(
-  sensors src/sensors.cpp
-)
-add_library(
-  I2C src/I2C.cpp
-)
+#add_library(
+#  sensors src/sensors.cpp
+#)
+#add_library(
+#  I2C src/I2C.cpp
+#)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(drone ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(navigation src/navigation.cpp)
+# add_executable(navigation src/navigation.cpp)
 add_executable(joystick_driver src/joystick_driver.cpp)
 
 ## Rename C++ executable without prefix
@@ -151,15 +151,15 @@ add_executable(joystick_driver src/joystick_driver.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(joystick_driver ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(
-  navigation
-  sensors
-  I2C
-  ${catkin_LIBRARIES}
-)
+#target_link_libraries(
+#  navigation
+#  sensors
+#  I2C
+#  ${catkin_LIBRARIES}
+#)
 
 target_link_libraries(joystick_driver ${catkin_LIBRARIES})
 
