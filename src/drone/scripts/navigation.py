@@ -272,7 +272,7 @@ class QMC5883(Magnetometer):
 
     # INI_FILE = Path(__file__).resolve().parent / 'settings' / 'QMC5883.ini'
 
-    def __init__(self, bus, oversampling=512, range=2, rate=10, mode=1):
+    def __init__(self, bus, oversampling=512, range=2, rate=100, mode=1):
 
         allowed_oversampling = (512, 256, 128, 64)
         allowed_range = (2, 8)
