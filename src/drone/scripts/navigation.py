@@ -747,7 +747,7 @@ class InertialNavigationSystem:
     @property
     def state(self):
         # return [self.roll, self.pitch, self.yaw]
-        return self.q
+        return self.q, self.depth
 
     def configure_system(self):
         """
@@ -785,7 +785,7 @@ def talker():
 
         # press.get_raw_data()
         # alt = press.getAltitude()
-        q = system.state
+        q, z = system.state
         # msg = "(%f, %f, %f)|(%f, %f, %f)|(%f, %f, %f)" % (state[0], state[1], state[2], state[3], state[4], state[5], state[6], state[7], state[8])
         # msg = Float32MultiArray(data=state)
         msg = PoseStamped()
@@ -796,7 +796,7 @@ def talker():
 
         msg.pose.position.x = 0
         msg.pose.position.y = 0
-        msg.pose.position.z = 0
+        msg.pose.position.z = z
 
         imu_msg = Imu()
         imu_msg.orientation.w = q[0]

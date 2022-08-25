@@ -55,6 +55,7 @@ void MPU6050::startup(I2C bus, int fd)
     this->bus = bus;
     this->fd = fd;
     this->bus.selectDevice(this->fd, MPU6050_ADDR, "MPU6050");
+
     this->bus.writeRegister(this->fd, DIV, 7);
     this->bus.writeRegister(this->fd, PWR_M, 1);
     this->bus.writeRegister(this->fd, CONFIG, 0);
@@ -65,6 +66,8 @@ void MPU6050::startup(I2C bus, int fd)
 
 int MPU6050::get_raw_data()
 {
+    this->bus.selectDevice(this->fd, MPU6050_ADDR, "QMC5883");
+
     ax = get_value(bus.readRegister(fd, ACCEL_XOUT_L), bus.readRegister(fd, ACCEL_XOUT_H));
     ay = get_value(bus.readRegister(fd, ACCEL_YOUT_L), bus.readRegister(fd, ACCEL_YOUT_H));
     az = get_value(bus.readRegister(fd, ACCEL_ZOUT_L), bus.readRegister(fd, ACCEL_ZOUT_H));
@@ -134,10 +137,12 @@ QMC5883::QMC5883( int chosen_oversampling, int chosen_range, int chosen_rate, in
         this->rate = CONFIG_200HZ;
     }
 
-    if (chosen_mode == 0) {
+    if (chosen_mode == 0) 
+    {
         this->mode = CONFIG_STANDBY;
     }
-    else if (chosen_mode == 1) {
+    else if (chosen_mode == 1) 
+    {
         this->mode = CONFIG_CONT;
     }
 
@@ -150,10 +155,12 @@ void QMC5883::startup(I2C bus, int fd)
     this->bus = bus;
     this->fd = fd;
 
-    this->bus.selectDevice(this->fd, ADDRESS, "MPU6050");
+    this->bus.selectDevice(this->fd, QMC5883_ADDRESS, "QMC5883");
 
-    this->bus.writeRegister(this->fd, REG_CONTROL_1, oversampling | range | rate | mode);
-    this->bus.writeRegister(this->fd, REG_CONTROL_2, CONFIG2_ROL_PTR);
+    // this->bus.writeRegister(this->fd, REG_CONTROL_1, oversampling | range | rate | mode);
+    this->bus.writeRegister(this->fd, REG_CONTROL_1, 0x01);
+    // this->bus.writeRegister(this->fd, REG_CONTROL_2, CONFIG2_ROL_PTR);
+    this->bus.writeRegister(this->fd, REG_CONTROL_2, 0x50);
     this->bus.writeRegister(this->fd, REG_PERIOD, 0x01);
 }
 
@@ -166,6 +173,8 @@ char QMC5883::read_status()
 
 int QMC5883::get_raw_data()
 {
+    this->bus.selectDevice(this->fd, QMC5883_ADDRESS, "QMC5883");
+
     mx = get_value(bus.readRegister(fd, XOUT_LSB), bus.readRegister(fd, XOUT_MSB));
     my = get_value(bus.readRegister(fd, YOUT_LSB), bus.readRegister(fd, YOUT_MSB));
     mz = get_value(bus.readRegister(fd, ZOUT_LSB), bus.readRegister(fd, ZOUT_MSB));
@@ -224,7 +233,10 @@ unsigned char MS5837_30BA::_crc4(unsigned int n_prom[])
 
 int MS5837_30BA::get_raw_data()
 {
-    int D1 = 0, D2 = 0;
+
+    // this->bus.selectDevice(this->fd, MS5837_30BA_ADDRESS, "Pressure");
+
+    unsigned long D1 = 0, D2 = 0;
     int rv;
     unsigned char pdata[3] = {0}, tdata[3] = {0};
     bus.writeRegister(fd, CONVERT_D1_OSR8192, 0);
@@ -238,29 +250,30 @@ int MS5837_30BA::get_raw_data()
     D2 = tdata[0] << 16 | tdata[1] << 8 | tdata[2];
 
     calculate(D1, D2);
+    return 0;
 }
 
 
 void MS5837_30BA::calculate(int D1, int D2)
 {
-    int32_t dT, temp;
-    int64_t OFF, SENS;
-    int32_t SENSi = 0;
-    int64_t OFFi = 0;
-    int32_t Ti = 0;
-    int64_t OFF2 = 0;
-    int64_t SENS2 = 0;
+    long dT, temp;
+    long long OFF, SENS;
+    long SENSi = 0;
+    long long OFFi = 0;
+    long Ti = 0;
+    long OFF2 = 0;
+    long SENS2 = 0;
 
     dT = D2 - u_int32_t(C[5]) * 256l;
-    SENS = int64_t(C[1]) * 32768l + (int64_t(C[3]) * dT) / 256l;
-    OFF = int64_t(C[2]) * 65536l + (int64_t(C[4]) * dT) / 128l;
+    SENS = static_cast<long long>(C[1]) * 32768l + (static_cast<long long>(C[3]) * dT) / 256l;
+    OFF = static_cast<long long>(C[2]) * 65536l + (int64_t(C[4]) * dT) / 128l;
 
     Pressure = (D1 * SENS / 2097152l - OFF) / 8192l;
     Temperature = 2000l + int64_t(dT) * C[6] / 8388608LL;
 
     if (Temperature / 100. < 20)
     {
-        Ti = (3 * int64_t(dT) * int64_t(dT)) / 8589934592LL;
+        Ti = (3 * static_cast<long long>(dT) * static_cast<long long>(dT)) / 8589934592LL;
         OFFi = (3 * (Temperature - 2000) * (Temperature - 2000)) / 2;
         SENSi = (5 * (Temperature - 2000) * (Temperature - 2000)) / 8;
         if (Temperature / 100. < -15)

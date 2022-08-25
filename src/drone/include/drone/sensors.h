@@ -91,7 +91,7 @@ class QMC5883 : public Magnetometer
     const char REG_CONTROL_1 = 0x09;
     const char REG_CONTROL_2 = 0x0A;
     const char REG_PERIOD = 0x0B;
-    const char ADDRESS = 0x0D;
+    const char QMC5883_ADDRESS = 0x0D;
 
     // Oversampling values for the CONFIG register
     const char CONFIG_OS512 = 0b00000000;

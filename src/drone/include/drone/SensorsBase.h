@@ -337,31 +337,31 @@ class Magnetometer: public Sensor
 class Barometer : public Sensor
 {
     public:
-        long Pressure;
+        double Pressure;
 
         Barometer()
         {
             this->Pressure = 0;
         }
 
-        void setP(long pressure)
+        void setP(double pressure)
         {
             this->Pressure = Pressure;
         }
 
-        long getP()
+        double getP()
         {
             return this->Pressure;
         }
 
         float getDepth()
         {
-            return (float) (getP() - 101325) / (9.80665 * 997);
+            return static_cast<float>(getP() - 101325) / (9.80665 * 997);
         }
 
         float getAltitude()
         {
-            return (float) (1 - pow((getP() / 101325), .190295) * 145366.45 * .3048);
+            return static_cast<float>(1 - pow((getP() / 101325), .190295) * 145366.45 * .3048);
         }
 };
 

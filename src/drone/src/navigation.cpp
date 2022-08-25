@@ -36,22 +36,22 @@ int main(int argc, char **argv)
    MS5837_30BA bar;
    MadgwickFilter ahrs;
 
-   imu.startup(i2c1, fd);
+//    imu.startup(i2c1, fd);
 //    compass.startup(i2c1, fd);
    bar.startup(i2c1, fd);
 
     while (ros::ok())
     {
-        imu.get_raw_data();
+        // imu.get_raw_data();
         // compass.get_raw_data();
         bar.get_raw_data();
 
-        imu.get_sample();
+        // imu.get_sample();
         // compass.get_sample();
 
-        cout << imu.axr << " " << imu.ayr << " " << imu.azr << " " << imu.gxr << " " << imu.gyr << " " << imu.gzr << endl;
+        // cout << imu.axr << " " << imu.ayr << " " << imu.azr << " " << imu.gxr << " " << imu.gyr << " " << imu.gzr << endl;
         // cout << compass.mxr << " " << compass.myr << " " << compass.mzr << endl;
-        cout << bar.getAltitude() << endl;
+        // cout << bar.getP() << endl;
 
         // bar.getDepth();
 
