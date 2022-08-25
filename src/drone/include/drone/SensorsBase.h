@@ -64,14 +64,14 @@ class Sensor3Axis: public Sensor
             this->z = z;
         }
 
-        auto getX()
-        {
-            struct vector
-            {
-                long x, y, z;
-            };
-            return vector {this->x, this->y, this->z};
-        }
+        // auto getX()
+        // {
+        //     struct vector
+        //     {
+        //         long x, y, z;
+        //     };
+        //     return vector {this->x, this->y, this->z};
+        // }
 
         void set_range(int input_range)
         {
@@ -112,14 +112,14 @@ class Accelerometer: public Sensor
             this->az = az;
         }
 
-        auto getA()
-        {
-            struct acceleration
-            {
-                long ax, ay, az;
-            };
-            return acceleration {this->ax, this->ay, this->az};
-        }
+        // auto getA()
+        // {
+        //     struct acceleration
+        //     {
+        //         long ax, ay, az;
+        //     };
+        //     return acceleration {this->ax, this->ay, this->az};
+        // }
 
         void set_accelerometer_range(int sensor_range)
         {
@@ -188,14 +188,14 @@ class Gyroscope: public Sensor
             this->gz = gz;
         }
 
-        auto getG()
-        {
-            struct rotation
-            {
-                long gx, gy, gz;
-            };
-            return rotation {this->gx, this->gy, this->gz};
-        }
+        // auto getG()
+        // {
+        //     struct rotation
+        //     {
+        //         long gx, gy, gz;
+        //     };
+        //     return rotation {this->gx, this->gy, this->gz};
+        // }
 
         void set_gyroscope_range(int sensor_range)
         {
@@ -265,14 +265,14 @@ class Magnetometer: public Sensor
             this->mz = mz;
         }
 
-        auto getM()
-        {
-            struct magnetic_inclination
-            {
-                long mx, my, mz;
-            };
-            return magnetic_inclination {this->mx, this->my, this->mz};
-        }
+        // auto getM()
+        // {
+        //     struct magnetic_inclination
+        //     {
+        //         long mx, my, mz;
+        //     };
+        //     return magnetic_inclination {this->mx, this->my, this->mz};
+        // }
 
         void set_magnetometer_range(int sensor_range)
         {

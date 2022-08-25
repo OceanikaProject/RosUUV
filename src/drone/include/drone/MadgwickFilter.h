@@ -1,4 +1,5 @@
-
+#if !defined( MADGWICK_FILTER_H )
+#define MADGWICK_FILTER_H
 
 
 class MadgwickFilter
@@ -41,3 +42,5 @@ class MadgwickFilter
         return yaw;
     }
 };
+
+#endif

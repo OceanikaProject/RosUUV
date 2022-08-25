@@ -1,5 +1,5 @@
 #include <math.h>
-#include "MadgwickFilter.h"
+#include "drone/MadgwickFilter.h"
 
 //-------------------------------------------------------------------------------------------
 // Definitions
