@@ -26,6 +26,12 @@ int I2C::selectDevice(int fd, int addr, char *name)
 }
 
 
+void I2C::writeR(int fd, char *buffer, int len)
+{
+    write(fd, buffer, len);
+}
+
+
 void I2C::writeRegister(int fd, int reg, int val)
 {
     int s;
@@ -61,6 +67,17 @@ int I2C::readRegister(int fd, int reg)
     {
         return buf[0];
     }
+}
+
+bool I2C::readBlock(int fd, char *buffer, int len)
+{
+    
+    // buf[0] = reg;
+    if (read(fd, buffer, len) != len)
+    {
+        return false;
+    }
+    return true;
 }
 
 

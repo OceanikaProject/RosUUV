@@ -17,8 +17,10 @@ class I2C
         I2C();
         I2C(char*);
         int selectDevice(int, int, char*);
+        void writeR(int, char *, int);
         void writeRegister(int, int, int);
         int readRegister(int, int);
+        bool readBlock(int, char *, int);
         int i2c_rdwr_block(int, u_int8_t, u_int8_t, u_int8_t, unsigned char*);
 };
 

@@ -1,4 +1,5 @@
 #include "drone/sensors.h"
+#include "wiringPiI2C.h"
 
 
 MPU6050::MPU6050() : Accelerometer::Accelerometer(), Gyroscope::Gyroscope()
@@ -181,30 +182,48 @@ int QMC5883::get_raw_data()
 }
 
 
-void MS5837_30BA::startup(I2C bus, int fd)
+bool MS5837_30BA::startup(I2C bus, int fd)
 {
     bus.selectDevice(fd, MS5837_30BA_ADDRESS, "Pressure");
 
     int c;
+    int rv;
+    char data[2] = {0};
+
+    int result;
+    // fd = wiringPiI2CSetup(0x76);
+    cout << "Init result: "<< fd << endl;
 
     bus.writeRegister(fd, RESET, 0);
+    // result = wiringPiI2CWriteReg8(fd, 0x1E, 0);
 
     usleep(10000);
-
+    char b[2];
     for (u_int8_t i = 0; i < 7; i++)
     {
-        c = bus.readRegister(fd, PROM_READ + 2*i);
-        c = ((c & 0xFF) << 8) | (c >> 8);
-        C[i] = c;
+        
+        b[0] = PROM_READ + 2*i;
 
+        bus.writeR(fd, b, 1);
+        bus.readBlock(fd, data, 2);
+        c = (data[1] << 8) | data[0];
+        // c = wiringPiI2CReadReg16(fd, 0xA0 + 2*i);
+        
+        // c = (bus.readRegister(fd, PROM_READ + 2*i) << 8) | bus.readRegister(fd, PROM_READ + 2*i);
+        cout << hex <<  c << " | ";
+        c = ((c & 0xFF) << 8) | (c >> 8);
+        cout << c << " | ";
+        C[i] = c;
+        cout << endl;
     }
     int crc = C[0] >> 12;
     int crcCalculated = _crc4(C);
-    // if (crcCalculated != crc)
-    // {
-    //     return false;
-    // }
-    // return true;
+    cout << dec << crc << " | " << crcCalculated << endl;
+    if (crcCalculated != crc)
+    {
+        return false;
+    }
+    return true;
 }
 
 
@@ -241,12 +260,20 @@ int MS5837_30BA::get_raw_data()
     unsigned char pdata[3] = {0}, tdata[3] = {0};
     bus.writeRegister(fd, CONVERT_D1_OSR8192, 0);
     usleep(2.5e-6*pow(2, (8+5)));
-    rv = bus.i2c_rdwr_block(fd, ADC_READ, I2C_SMBUS_READ, 3, pdata);
+    // pdata[0] = wiringPiI2CReadReg8(fd, ADC_READ);
+    // pdata[1] = wiringPiI2CReadReg8(fd, ADC_READ);
+    // pdata[2] = wiringPiI2CReadReg8(fd, ADC_READ);
+
     D1 = pdata[0] << 16 | pdata[1] << 8 | pdata[2];
 
     bus.writeRegister(fd, CONVERT_D2_OSR8192, 0);
-    usleep(2.5e-6*pow(2, (8+5)));
-    rv = bus.i2c_rdwr_block(fd, ADC_READ, I2C_SMBUS_READ, 3, tdata);
+    usleep(2.5e-6*pow(2, (8+4)));
+    // pdata[0] = bus.readRegister(fd, ADC_READ);
+    // pdata[1] = bus.readRegister(fd, ADC_READ + 1);
+    // pdata[2] = bus.readRegister(fd, ADC_READ + 2);
+    // tdata[0] = wiringPiI2CReadReg8(fd, ADC_READ);
+    // tdata[1] = wiringPiI2CReadReg8(fd, ADC_READ);
+    // tdata[2] = wiringPiI2CReadReg8(fd, ADC_READ);
     D2 = tdata[0] << 16 | tdata[1] << 8 | tdata[2];
 
     calculate(D1, D2);
@@ -254,15 +281,15 @@ int MS5837_30BA::get_raw_data()
 }
 
 
-void MS5837_30BA::calculate(int D1, int D2)
+void MS5837_30BA::calculate(unsigned long D1, unsigned long D2)
 {
-    long dT, temp;
-    long long OFF, SENS;
-    long SENSi = 0;
-    long long OFFi = 0;
-    long Ti = 0;
-    long OFF2 = 0;
-    long SENS2 = 0;
+    int32_t dT, temp;
+    int64_t OFF, SENS;
+    int32_t SENSi = 0;
+    int32_t OFFi = 0;
+    int32_t Ti = 0;
+    int64_t OFF2 = 0;
+    int64_t SENS2 = 0;
 
     dT = D2 - u_int32_t(C[5]) * 256l;
     SENS = static_cast<long long>(C[1]) * 32768l + (static_cast<long long>(C[3]) * dT) / 256l;

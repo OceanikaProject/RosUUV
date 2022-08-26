@@ -119,8 +119,12 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
+
+set(wiringPi_include "/usr/local/include")
+
 include_directories(
   include
+  ${wiringPi_include}
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -150,12 +154,15 @@ add_executable(joystick_driver src/joystick_driver.cpp)
 ## same as for the library above
 add_dependencies(joystick_driver ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
+LINK_DIRECTORIES("/usr/local/lib")
+
 ## Specify libraries to link a library or executable target against
 target_link_libraries(
   navigation
   sensors
   I2C
   MadgwickFilter
+  wiringPi
   ${catkin_LIBRARIES}
 )
 

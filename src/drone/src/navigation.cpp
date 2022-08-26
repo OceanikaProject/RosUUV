@@ -38,20 +38,21 @@ int main(int argc, char **argv)
 
 //    imu.startup(i2c1, fd);
 //    compass.startup(i2c1, fd);
-   bar.startup(i2c1, fd);
+   bool ok = bar.startup(i2c1, fd);
+   cout << "ok = " << ok << endl;
 
     while (ros::ok())
     {
         // imu.get_raw_data();
         // compass.get_raw_data();
-        bar.get_raw_data();
+        // bar.get_raw_data();
 
         // imu.get_sample();
         // compass.get_sample();
 
         // cout << imu.axr << " " << imu.ayr << " " << imu.azr << " " << imu.gxr << " " << imu.gyr << " " << imu.gzr << endl;
         // cout << compass.mxr << " " << compass.myr << " " << compass.mzr << endl;
-        // cout << bar.getP() << endl;
+        // cout << bar.getP() << " | " << bar.getT() << endl;
 
         // bar.getDepth();
 

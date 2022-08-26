@@ -179,7 +179,7 @@ class MS5837_30BA : public Barometer
         MS5837_30BA() : Barometer::Barometer()
         { }
 
-        void startup(I2C bus, int fd);
+        bool startup(I2C bus, int fd);
         unsigned char _crc4(unsigned int n_prom[]);
 
 
@@ -194,7 +194,7 @@ class MS5837_30BA : public Barometer
             return Temperature;
         }
 
-        void calculate(int D1, int D2);
+        void calculate(unsigned long D1, unsigned long D2);
 };
 
 
