@@ -26,9 +26,21 @@ int I2C::selectDevice(int fd, int addr, char *name)
 }
 
 
-void I2C::writeR(int fd, char *buffer, int len)
+bool I2C::writeR(int fd, unsigned char *buffer, int len)
 {
-    write(fd, buffer, len);
+    if (write(fd, buffer, len) != len) return false;
+    return true;
+}
+
+bool I2C::readBlock(int fd, unsigned char *buffer, int len)
+{
+    
+    // buf[0] = reg;
+    if (read(fd, buffer, len) != len)
+    {
+        return false;
+    }
+    return true;
 }
 
 
@@ -69,16 +81,7 @@ int I2C::readRegister(int fd, int reg)
     }
 }
 
-bool I2C::readBlock(int fd, char *buffer, int len)
-{
-    
-    // buf[0] = reg;
-    if (read(fd, buffer, len) != len)
-    {
-        return false;
-    }
-    return true;
-}
+
 
 
 int I2C::i2c_rdwr_block(int fd, u_int8_t reg, u_int8_t read_write, u_int8_t length, unsigned char* buffer)

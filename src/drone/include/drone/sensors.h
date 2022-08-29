@@ -169,7 +169,7 @@ class MS5837_30BA : public Barometer
 
         I2C bus;
         int fd;
-        float Temperature;
+        double Temperature;
 
         const float Pa = 100.0f;
         const float bar = 0.001f;

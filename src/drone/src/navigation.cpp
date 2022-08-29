@@ -36,10 +36,10 @@ int main(int argc, char **argv)
    MS5837_30BA bar;
    MadgwickFilter ahrs;
 
-   imu.startup(i2c1, fd);
-   compass.startup(i2c1, fd);
-//    bool ok = bar.startup(i2c1, fd);
-//    cout << "ok = " << ok << endl;
+//    imu.startup(i2c1, fd);
+//    compass.startup(i2c1, fd);
+   bool ok = bar.startup(i2c1, fd);
+   cout << "ok = " << ok << endl;
 
     float ax, ay, az;
     float gx, gy, gz;
@@ -47,20 +47,20 @@ int main(int argc, char **argv)
 
     while (ros::ok())
     {
-        imu.get_raw_data();
-        compass.get_raw_data();
-        // bar.get_raw_data();
+        // imu.get_raw_data();
+        // compass.get_raw_data();
+        bar.get_raw_data();
 
-        imu.Accelerometer::get_sample();
-        imu.Gyroscope::get_sample();
-        compass.get_sample();
+        // imu.Accelerometer::get_sample();
+        // imu.Gyroscope::get_sample();
+        // compass.get_sample();
 
-        imu.Accelerometer::getX(ax, ay, az);
-        imu.Gyroscope::getX(gx, gy, gz);
-        compass.getX(mx, my, mz);
+        // imu.Accelerometer::getX(ax, ay, az);
+        // imu.Gyroscope::getX(gx, gy, gz);
+        // compass.getX(mx, my, mz);
 
-        cout << ax << " " << ay << " " << az << " " << gx << " " << gy << " " << gz << endl;
-        // cout << bar.getP() << " | " << bar.getT() << endl;
+        // cout << ax << " " << ay << " " << az << " " << gx << " " << gy << " " << gz << endl;
+        cout << bar.getP() << " | " << bar.getT() << endl;
 
         // bar.getDepth();
 

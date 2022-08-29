@@ -193,30 +193,34 @@ void QMC5883::get_raw_data()
 
 bool MS5837_30BA::startup(I2C bus, int fd)
 {
+
+    this->fd = fd;
     bus.selectDevice(fd, MS5837_30BA_ADDRESS, "Pressure");
 
     int c;
     int rv;
-    char data[2] = {0};
-
+    unsigned char data[2] = {0};
+    unsigned char b[2];
     int result;
-    // fd = wiringPiI2CSetup(0x76);
     cout << "Init result: "<< fd << endl;
+    bool ok;
+    b[0] = RESET;
+    // bus.writeRegister(fd, RESET, 0);
+    ok = bus.writeR(fd, b, 1);
+    cout << "write RESET = " << ok << endl;
 
-    bus.writeRegister(fd, RESET, 0);
-    // result = wiringPiI2CWriteReg8(fd, 0x1E, 0);
-
-    usleep(10000);
-    char b[2];
+    usleep(20000);
+    
     for (u_int8_t i = 0; i < 7; i++)
     {
         
         b[0] = PROM_READ + 2*i;
 
-        bus.writeR(fd, b, 1);
-        bus.readBlock(fd, data, 2);
+        ok = bus.writeR(fd, b, 1);
+        cout << "write PROMREAD = " << ok << endl;
+        ok = bus.readBlock(fd, data, 2);
+        cout << "read PROMREAD = " << ok << endl;
         c = (data[1] << 8) | data[0];
-        // c = wiringPiI2CReadReg16(fd, 0xA0 + 2*i);
         
         // c = (bus.readRegister(fd, PROM_READ + 2*i) << 8) | bus.readRegister(fd, PROM_READ + 2*i);
         cout << hex <<  c << " | ";
@@ -262,27 +266,33 @@ unsigned char MS5837_30BA::_crc4(unsigned int n_prom[])
 void MS5837_30BA::get_raw_data()
 {
 
-    // this->bus.selectDevice(this->fd, MS5837_30BA_ADDRESS, "Pressure");
+    this->bus.selectDevice(this->fd, MS5837_30BA_ADDRESS, "Pressure");
 
     unsigned long D1 = 0, D2 = 0;
     int rv;
     unsigned char pdata[3] = {0}, tdata[3] = {0};
-    bus.writeRegister(fd, CONVERT_D1_OSR8192, 0);
-    usleep(2.5e-6*pow(2, (8+5)));
-    // pdata[0] = wiringPiI2CReadReg8(fd, ADC_READ);
-    // pdata[1] = wiringPiI2CReadReg8(fd, ADC_READ);
-    // pdata[2] = wiringPiI2CReadReg8(fd, ADC_READ);
+    unsigned char b[2];
+
+    bool ok;
+
+    b[0] = CONVERT_D1_OSR8192;
+    ok = bus.writeR(fd, b, 1);
+    usleep(2.5e-6*pow(2, (8+5)) * 1000000);
+
+    b[0] = ADC_READ;
+    ok = bus.writeR(fd, b, 1);
+    ok = bus.readBlock(fd, pdata, 3);
 
     D1 = pdata[0] << 16 | pdata[1] << 8 | pdata[2];
 
-    bus.writeRegister(fd, CONVERT_D2_OSR8192, 0);
-    usleep(2.5e-6*pow(2, (8+4)));
-    // pdata[0] = bus.readRegister(fd, ADC_READ);
-    // pdata[1] = bus.readRegister(fd, ADC_READ + 1);
-    // pdata[2] = bus.readRegister(fd, ADC_READ + 2);
-    // tdata[0] = wiringPiI2CReadReg8(fd, ADC_READ);
-    // tdata[1] = wiringPiI2CReadReg8(fd, ADC_READ);
-    // tdata[2] = wiringPiI2CReadReg8(fd, ADC_READ);
+    b[0] = CONVERT_D2_OSR8192;
+    ok = bus.writeR(fd, b, 1);
+
+    usleep(2.5e-6*pow(2, (8+5)) * 1000000);
+    b[0] = ADC_READ;
+    ok = bus.writeR(fd, b, 1);
+    ok = bus.readBlock(fd, tdata, 3);
+
     D2 = tdata[0] << 16 | tdata[1] << 8 | tdata[2];
 
     calculate(D1, D2);
@@ -300,15 +310,15 @@ void MS5837_30BA::calculate(unsigned long D1, unsigned long D2)
     int64_t SENS2 = 0;
 
     dT = D2 - u_int32_t(C[5]) * 256l;
-    SENS = static_cast<long long>(C[1]) * 32768l + (static_cast<long long>(C[3]) * dT) / 256l;
-    OFF = static_cast<long long>(C[2]) * 65536l + (int64_t(C[4]) * dT) / 128l;
+    SENS = static_cast<int64_t>(C[1]) * 32768l + (static_cast<int64_t>(C[3]) * dT) / 256l;
+    OFF = static_cast<int64_t>(C[2]) * 65536l + (static_cast<int64_t>(C[4]) * dT) / 128l;
 
     Pressure = (D1 * SENS / 2097152l - OFF) / 8192l;
     Temperature = 2000l + int64_t(dT) * C[6] / 8388608LL;
 
     if (Temperature / 100. < 20)
     {
-        Ti = (3 * static_cast<long long>(dT) * static_cast<long long>(dT)) / 8589934592LL;
+        Ti = (3 * static_cast<int64_t>(dT) * static_cast<int64_t>(dT)) / 8589934592LL;
         OFFi = (3 * (Temperature - 2000) * (Temperature - 2000)) / 2;
         SENSi = (5 * (Temperature - 2000) * (Temperature - 2000)) / 8;
         if (Temperature / 100. < -15)
@@ -326,6 +336,6 @@ void MS5837_30BA::calculate(unsigned long D1, unsigned long D2)
     OFF2 = OFF - OFFi;
     SENS2 = SENS - SENSi;
 
-    Temperature = (Temperature - Ti) / 100;
-    Pressure = (((D1 * SENS2) / (2097152l) - OFF2) / 8192l) / 10.0;
+    Temperature = static_cast<double>( (Temperature - Ti) / 100 );
+    Pressure = static_cast<double>( (((D1 * SENS2) / (2097152l) - OFF2) / 8192l) / 10.0);
 }
