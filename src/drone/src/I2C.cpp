@@ -26,16 +26,16 @@ int I2C::selectDevice(int fd, int addr, char *name)
 }
 
 
-bool I2C::writeR(int fd, unsigned char *buffer, int len)
+bool I2C::i2c_write(int fd, int reg)
 {
-    if (write(fd, buffer, len) != len) return false;
+    unsigned char buf[2] = {reg, 0};
+    if (write(fd, buf, 1) != 1) return false;
     return true;
 }
 
-bool I2C::readBlock(int fd, unsigned char *buffer, int len)
+bool I2C::i2c_read_block(int fd, unsigned char *buffer, int len)
 {
     
-    // buf[0] = reg;
     if (read(fd, buffer, len) != len)
     {
         return false;
@@ -44,7 +44,7 @@ bool I2C::readBlock(int fd, unsigned char *buffer, int len)
 }
 
 
-void I2C::writeRegister(int fd, int reg, int val)
+void I2C::i2c_write_register(int fd, int reg, int val)
 {
     int s;
     char buf[2];
@@ -64,7 +64,7 @@ void I2C::writeRegister(int fd, int reg, int val)
 }
 
 
-int I2C::readRegister(int fd, int reg)
+int I2C::i2c_read_register(int fd, int reg)
 {
     int buf[] = {reg};
     if (write(fd, buf, 1) != 1)
@@ -79,52 +79,4 @@ int I2C::readRegister(int fd, int reg)
     {
         return buf[0];
     }
-}
-
-
-
-
-int I2C::i2c_rdwr_block(int fd, u_int8_t reg, u_int8_t read_write, u_int8_t length, unsigned char* buffer)
-{
-    struct i2c_smbus_ioctl_data ioctl_data;
-    union i2c_smbus_data smbus_data;
-
-    int rv;
-
-    if (length > I2C_SMBUS_BLOCK_MAX)
-    {
-        return -1;
-    }
-
-    smbus_data.block[0] = length;
-
-    if (read_write != I2C_SMBUS_READ)
-    {
-        for (int i = 0; i < length; i++)
-        {
-            smbus_data.block[i + 1] = buffer[i];
-        }
-    }
-
-    ioctl_data.read_write = read_write;
-    ioctl_data.command = reg;
-    ioctl_data.size = I2C_SMBUS_I2C_BLOCK_DATA;
-    ioctl_data.data = &smbus_data;
-
-    rv = ioctl(fd, I2C_SMBUS, &ioctl_data);
-
-    if (rv < 0)
-    {
-        return rv;
-    }
-
-    if (read_write == I2C_SMBUS_READ)
-    {
-        for (int i = 0; i < length; i++)
-        {
-            buffer[i] = smbus_data.block[i + 1];
-        }
-    }
-
-    return rv;
 }

@@ -57,12 +57,12 @@ void MPU6050::startup(I2C bus, int fd)
     this->fd = fd;
     this->bus.selectDevice(this->fd, MPU6050_ADDR, "MPU6050");
 
-    this->bus.writeRegister(this->fd, DIV, 7);
-    this->bus.writeRegister(this->fd, PWR_M, 1);
-    this->bus.writeRegister(this->fd, CONFIG, 0);
-    this->bus.writeRegister(this->fd, GYRO_CONFIG, this->gyroscope_range_configuration);
-    this->bus.writeRegister(this->fd, ACCEL_CONFIG, this->accelerometer_range_configuration);
-    this->bus.writeRegister(this->fd, INT_EN, 1);
+    this->bus.i2c_write_register(this->fd, DIV, 7);
+    this->bus.i2c_write_register(this->fd, PWR_M, 1);
+    this->bus.i2c_write_register(this->fd, CONFIG, 0);
+    this->bus.i2c_write_register(this->fd, GYRO_CONFIG, this->gyroscope_range_configuration);
+    this->bus.i2c_write_register(this->fd, ACCEL_CONFIG, this->accelerometer_range_configuration);
+    this->bus.i2c_write_register(this->fd, INT_EN, 1);
 }
 
 void MPU6050::get_raw_data()
@@ -71,15 +71,15 @@ void MPU6050::get_raw_data()
 
     float x, y, z;
 
-    x = get_value(bus.readRegister(fd, ACCEL_XOUT_L), bus.readRegister(fd, ACCEL_XOUT_H));
-    y = get_value(bus.readRegister(fd, ACCEL_YOUT_L), bus.readRegister(fd, ACCEL_YOUT_H));
-    z = get_value(bus.readRegister(fd, ACCEL_ZOUT_L), bus.readRegister(fd, ACCEL_ZOUT_H));
+    x = get_value(bus.i2c_read_register(fd, ACCEL_XOUT_L), bus.i2c_read_register(fd, ACCEL_XOUT_H));
+    y = get_value(bus.i2c_read_register(fd, ACCEL_YOUT_L), bus.i2c_read_register(fd, ACCEL_YOUT_H));
+    z = get_value(bus.i2c_read_register(fd, ACCEL_ZOUT_L), bus.i2c_read_register(fd, ACCEL_ZOUT_H));
 
     Accelerometer::setX(x, y, z);
 
-    x = get_value(bus.readRegister(fd, GYRO_XOUT_L), bus.readRegister(fd, GYRO_XOUT_H));
-    y = get_value(bus.readRegister(fd, GYRO_YOUT_L), bus.readRegister(fd, GYRO_YOUT_H));
-    z = get_value(bus.readRegister(fd, GYRO_ZOUT_L), bus.readRegister(fd, GYRO_ZOUT_H));
+    x = get_value(bus.i2c_read_register(fd, GYRO_XOUT_L), bus.i2c_read_register(fd, GYRO_XOUT_H));
+    y = get_value(bus.i2c_read_register(fd, GYRO_YOUT_L), bus.i2c_read_register(fd, GYRO_YOUT_H));
+    z = get_value(bus.i2c_read_register(fd, GYRO_ZOUT_L), bus.i2c_read_register(fd, GYRO_ZOUT_H));
 
     Gyroscope::setX(x, y, z);
 }
@@ -164,16 +164,16 @@ void QMC5883::startup(I2C bus, int fd)
     this->bus.selectDevice(this->fd, QMC5883_ADDRESS, "QMC5883");
 
     // this->bus.writeRegister(this->fd, REG_CONTROL_1, oversampling | range | rate | mode);
-    this->bus.writeRegister(this->fd, REG_CONTROL_1, 0x01);
+    this->bus.i2c_write_register(this->fd, REG_CONTROL_1, 0x01);
     // this->bus.writeRegister(this->fd, REG_CONTROL_2, CONFIG2_ROL_PTR);
-    this->bus.writeRegister(this->fd, REG_CONTROL_2, 0x50);
-    this->bus.writeRegister(this->fd, REG_PERIOD, 0x01);
+    this->bus.i2c_write_register(this->fd, REG_CONTROL_2, 0x50);
+    this->bus.i2c_write_register(this->fd, REG_PERIOD, 0x01);
 }
 
 
 char QMC5883::read_status()
 {
-    return bus.readRegister(fd, REG_STATUS);
+    return bus.i2c_read_register(fd, REG_STATUS);
 }
 
 
@@ -183,9 +183,9 @@ void QMC5883::get_raw_data()
 
     float x, y, z;
 
-    x = get_value(bus.readRegister(fd, XOUT_LSB), bus.readRegister(fd, XOUT_MSB));
-    y = get_value(bus.readRegister(fd, YOUT_LSB), bus.readRegister(fd, YOUT_MSB));
-    z = get_value(bus.readRegister(fd, ZOUT_LSB), bus.readRegister(fd, ZOUT_MSB));
+    x = get_value(bus.i2c_read_register(fd, XOUT_LSB), bus.i2c_read_register(fd, XOUT_MSB));
+    y = get_value(bus.i2c_read_register(fd, YOUT_LSB), bus.i2c_read_register(fd, YOUT_MSB));
+    z = get_value(bus.i2c_read_register(fd, ZOUT_LSB), bus.i2c_read_register(fd, ZOUT_MSB));
 
     Magnetometer::setX(x, y, z);
 }
@@ -202,36 +202,22 @@ bool MS5837_30BA::startup(I2C bus, int fd)
     unsigned char data[2] = {0};
     unsigned char b[2];
     int result;
-    cout << "Init result: "<< fd << endl;
-    bool ok;
-    b[0] = RESET;
-    // bus.writeRegister(fd, RESET, 0);
-    ok = bus.writeR(fd, b, 1);
-    cout << "write RESET = " << ok << endl;
+    bus.i2c_write(fd, RESET);
 
     usleep(20000);
     
     for (u_int8_t i = 0; i < 7; i++)
     {
-        
-        b[0] = PROM_READ + 2*i;
-
-        ok = bus.writeR(fd, b, 1);
-        cout << "write PROMREAD = " << ok << endl;
-        ok = bus.readBlock(fd, data, 2);
-        cout << "read PROMREAD = " << ok << endl;
+        bus.i2c_write(fd, PROM_READ + 2*i);
+        bus.i2c_read_block(fd, data, 2);
         c = (data[1] << 8) | data[0];
         
-        // c = (bus.readRegister(fd, PROM_READ + 2*i) << 8) | bus.readRegister(fd, PROM_READ + 2*i);
-        cout << hex <<  c << " | ";
         c = ((c & 0xFF) << 8) | (c >> 8);
-        cout << c << " | ";
         C[i] = c;
         cout << endl;
     }
     int crc = C[0] >> 12;
     int crcCalculated = _crc4(C);
-    cout << dec << crc << " | " << crcCalculated << endl;
     if (crcCalculated != crc)
     {
         return false;
@@ -271,27 +257,21 @@ void MS5837_30BA::get_raw_data()
     unsigned long D1 = 0, D2 = 0;
     int rv;
     unsigned char pdata[3] = {0}, tdata[3] = {0};
-    unsigned char b[2];
 
-    bool ok;
 
-    b[0] = CONVERT_D1_OSR8192;
-    ok = bus.writeR(fd, b, 1);
+    bus.i2c_write(fd, CONVERT_D1_OSR8192);
     usleep(2.5e-6*pow(2, (8+5)) * 1000000);
 
-    b[0] = ADC_READ;
-    ok = bus.writeR(fd, b, 1);
-    ok = bus.readBlock(fd, pdata, 3);
+    bus.i2c_write(fd, ADC_READ);
+    bus.i2c_read_block(fd, pdata, 3);
 
     D1 = pdata[0] << 16 | pdata[1] << 8 | pdata[2];
 
-    b[0] = CONVERT_D2_OSR8192;
-    ok = bus.writeR(fd, b, 1);
+    bus.i2c_write(fd, CONVERT_D2_OSR8192);
 
     usleep(2.5e-6*pow(2, (8+5)) * 1000000);
-    b[0] = ADC_READ;
-    ok = bus.writeR(fd, b, 1);
-    ok = bus.readBlock(fd, tdata, 3);
+    bus.i2c_write(fd, ADC_READ);
+    bus.i2c_read_block(fd, tdata, 3);
 
     D2 = tdata[0] << 16 | tdata[1] << 8 | tdata[2];
 
@@ -309,33 +289,39 @@ void MS5837_30BA::calculate(unsigned long D1, unsigned long D2)
     int64_t OFF2 = 0;
     int64_t SENS2 = 0;
 
+    double P, T;
+
     dT = D2 - u_int32_t(C[5]) * 256l;
     SENS = static_cast<int64_t>(C[1]) * 32768l + (static_cast<int64_t>(C[3]) * dT) / 256l;
     OFF = static_cast<int64_t>(C[2]) * 65536l + (static_cast<int64_t>(C[4]) * dT) / 128l;
 
-    Pressure = (D1 * SENS / 2097152l - OFF) / 8192l;
-    Temperature = 2000l + int64_t(dT) * C[6] / 8388608LL;
+    P = (D1 * SENS / 2097152l - OFF) / 8192l;
+    T = 2000l + int64_t(dT) * C[6] / 8388608LL;
 
-    if (Temperature / 100. < 20)
+    if (T / 100. < 20)
     {
         Ti = (3 * static_cast<int64_t>(dT) * static_cast<int64_t>(dT)) / 8589934592LL;
-        OFFi = (3 * (Temperature - 2000) * (Temperature - 2000)) / 2;
-        SENSi = (5 * (Temperature - 2000) * (Temperature - 2000)) / 8;
-        if (Temperature / 100. < -15)
+        OFFi = (3 * (T - 2000) * (T - 2000)) / 2;
+        SENSi = (5 * (T - 2000) * (T - 2000)) / 8;
+        if (T / 100. < -15)
         {
-            OFFi = OFFi + 7. * (Temperature + 1500l) * (Temperature + 1500l);
-            SENSi = SENSi + 4. * (Temperature + 1500l) * (Temperature + 1500l);
+            OFFi = OFFi + 7. * (T + 1500l) * (T + 1500l);
+            SENSi = SENSi + 4. * (T + 1500l) * (T + 1500l);
         }
     }
     else
     {
         Ti = 2 * (dT * dT) / (137438953472LL);
-        OFFi = (1 * (Temperature - 2000l) * (Temperature - 2000l)) / 16;
+        OFFi = (1 * (T - 2000l) * (T - 2000l)) / 16;
         SENSi = 0;
     }
     OFF2 = OFF - OFFi;
     SENS2 = SENS - SENSi;
 
-    Temperature = static_cast<double>( (Temperature - Ti) / 100 );
-    Pressure = static_cast<double>( (((D1 * SENS2) / (2097152l) - OFF2) / 8192l) / 10.0);
+    T = static_cast<double>( (T - Ti) / 100 );
+    P = static_cast<double>( (((D1 * SENS2) / (2097152l) - OFF2) / 8192l) / 10.0 );
+
+    setP(P * conversion);
+    setT(T);
+
 }

@@ -302,17 +302,19 @@ class Magnetometer: public Sensor3Axis
 
 class Barometer : public Sensor
 {
-    public:
+    protected:
+
         double Pressure;
+        void setP(double Pressure)
+        {
+            this->Pressure = Pressure;
+        }
+
+    public:
 
         Barometer()
         {
             this->Pressure = 0;
-        }
-
-        void setP(double pressure)
-        {
-            this->Pressure = Pressure;
         }
 
         double getP()

@@ -165,36 +165,41 @@ class MS5837_30BA : public Barometer
 
     const char MS5837_30BA_ADDRESS = 0x76;
 
-    public:
+    private:
 
         I2C bus;
         int fd;
         double Temperature;
-
-        const float Pa = 100.0f;
-        const float bar = 0.001f;
-        const float mbar = 1.0f;
-        unsigned int C[8];
-
-        MS5837_30BA() : Barometer::Barometer()
-        { }
-
-        bool startup(I2C bus, int fd);
+        float conversion;
         unsigned char _crc4(unsigned int n_prom[]);
-
-
-        void get_raw_data();
         void setT(float Temperature)
         {
             this->Temperature = Temperature;
         }
+        void calculate(unsigned long, unsigned long);
 
+    public:
+    
+        const static float Pa = 100.0f;
+        const static float bar = 0.001f;
+        const static float mbar = 1.0f;
+        unsigned int C[8];
+
+        MS5837_30BA() : Barometer::Barometer() {}
+
+        bool startup(I2C bus, int fd);
+        
+        void get_raw_data();
+
+        void set_conversion(float conversion = Pa)
+        {
+            this->conversion = conversion;
+        }
+        
         float getT()
         {
             return Temperature;
-        }
-
-        void calculate(unsigned long D1, unsigned long D2);
+        }  
 };
 
 
