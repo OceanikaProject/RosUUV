@@ -6,8 +6,8 @@ MPU6050::MPU6050() : Accelerometer::Accelerometer(), Gyroscope::Gyroscope()
 {
     this->accelerometer_range_configuration = ACCEL_RANGE_2G;
     this->gyroscope_range_configuration = GYRO_RANGE_250DEG;
-    this->set_accelerometer_range(CONVERT_2G);
-    this->set_gyroscope_range(CONVERT_250DEG);
+    this->Accelerometer::set_range(CONVERT_2G);
+    this->Gyroscope::set_range(CONVERT_250DEG);
 }
 
 MPU6050::MPU6050(int chosen_accelerometer_range, int chosen_gyroscope_range) : Accelerometer::Accelerometer(), Gyroscope::Gyroscope()
@@ -47,8 +47,8 @@ MPU6050::MPU6050(int chosen_accelerometer_range, int chosen_gyroscope_range) : A
         this->gyroscope_range_configuration = GYRO_RANGE_2000DEG;
     }
 
-    this->set_accelerometer_range(chosen_accelerometer_range);
-    this->set_gyroscope_range(chosen_gyroscope_range);
+    this->Accelerometer::set_range(chosen_accelerometer_range);
+    this->Gyroscope::set_range(chosen_gyroscope_range);
 }
 
 void MPU6050::startup(I2C bus, int fd)
@@ -65,18 +65,23 @@ void MPU6050::startup(I2C bus, int fd)
     this->bus.writeRegister(this->fd, INT_EN, 1);
 }
 
-int MPU6050::get_raw_data()
+void MPU6050::get_raw_data()
 {
     this->bus.selectDevice(this->fd, MPU6050_ADDR, "QMC5883");
 
-    ax = get_value(bus.readRegister(fd, ACCEL_XOUT_L), bus.readRegister(fd, ACCEL_XOUT_H));
-    ay = get_value(bus.readRegister(fd, ACCEL_YOUT_L), bus.readRegister(fd, ACCEL_YOUT_H));
-    az = get_value(bus.readRegister(fd, ACCEL_ZOUT_L), bus.readRegister(fd, ACCEL_ZOUT_H));
+    float x, y, z;
 
-    gx = get_value(bus.readRegister(fd, GYRO_XOUT_L), bus.readRegister(fd, GYRO_XOUT_H));
-    gy = get_value(bus.readRegister(fd, GYRO_YOUT_L), bus.readRegister(fd, GYRO_YOUT_H));
-    gz = get_value(bus.readRegister(fd, GYRO_ZOUT_L), bus.readRegister(fd, GYRO_ZOUT_H));
-    return 0;
+    x = get_value(bus.readRegister(fd, ACCEL_XOUT_L), bus.readRegister(fd, ACCEL_XOUT_H));
+    y = get_value(bus.readRegister(fd, ACCEL_YOUT_L), bus.readRegister(fd, ACCEL_YOUT_H));
+    z = get_value(bus.readRegister(fd, ACCEL_ZOUT_L), bus.readRegister(fd, ACCEL_ZOUT_H));
+
+    Accelerometer::setX(x, y, z);
+
+    x = get_value(bus.readRegister(fd, GYRO_XOUT_L), bus.readRegister(fd, GYRO_XOUT_H));
+    y = get_value(bus.readRegister(fd, GYRO_YOUT_L), bus.readRegister(fd, GYRO_YOUT_H));
+    z = get_value(bus.readRegister(fd, GYRO_ZOUT_L), bus.readRegister(fd, GYRO_ZOUT_H));
+
+    Gyroscope::setX(x, y, z);
 }
 
 
@@ -86,7 +91,7 @@ QMC5883::QMC5883() : Magnetometer::Magnetometer()
     this->range = CONFIG_2GAUSS;
     this->rate = CONFIG_100HZ;
     this->mode = CONFIG_CONT;
-    this->set_magnetometer_range(CONVERT_2GAUSS);
+    this->set_range(CONVERT_2GAUSS);
 }
 
 
@@ -147,7 +152,7 @@ QMC5883::QMC5883( int chosen_oversampling, int chosen_range, int chosen_rate, in
         this->mode = CONFIG_CONT;
     }
 
-    this->set_magnetometer_range(chosen_range);
+    this->Magnetometer::set_range(chosen_range);
 }
 
 
@@ -172,13 +177,17 @@ char QMC5883::read_status()
 }
 
 
-int QMC5883::get_raw_data()
+void QMC5883::get_raw_data()
 {
     this->bus.selectDevice(this->fd, QMC5883_ADDRESS, "QMC5883");
 
-    mx = get_value(bus.readRegister(fd, XOUT_LSB), bus.readRegister(fd, XOUT_MSB));
-    my = get_value(bus.readRegister(fd, YOUT_LSB), bus.readRegister(fd, YOUT_MSB));
-    mz = get_value(bus.readRegister(fd, ZOUT_LSB), bus.readRegister(fd, ZOUT_MSB));
+    float x, y, z;
+
+    x = get_value(bus.readRegister(fd, XOUT_LSB), bus.readRegister(fd, XOUT_MSB));
+    y = get_value(bus.readRegister(fd, YOUT_LSB), bus.readRegister(fd, YOUT_MSB));
+    z = get_value(bus.readRegister(fd, ZOUT_LSB), bus.readRegister(fd, ZOUT_MSB));
+
+    Magnetometer::setX(x, y, z);
 }
 
 
@@ -250,7 +259,7 @@ unsigned char MS5837_30BA::_crc4(unsigned int n_prom[])
 }
 
 
-int MS5837_30BA::get_raw_data()
+void MS5837_30BA::get_raw_data()
 {
 
     // this->bus.selectDevice(this->fd, MS5837_30BA_ADDRESS, "Pressure");
@@ -277,7 +286,6 @@ int MS5837_30BA::get_raw_data()
     D2 = tdata[0] << 16 | tdata[1] << 8 | tdata[2];
 
     calculate(D1, D2);
-    return 0;
 }
 
 

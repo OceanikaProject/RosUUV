@@ -68,7 +68,7 @@ class MPU6050 : public Accelerometer, public Gyroscope
 
         void startup(I2C bus, int fd);
         char read_status();
-        int get_raw_data();
+        void get_raw_data();
         void get_sample()
         {
             Accelerometer::get_sample();
@@ -136,7 +136,7 @@ class QMC5883 : public Magnetometer
 
         void startup(I2C bus, int fd);
         char read_status();
-        int get_raw_data();
+        void get_raw_data();
         void get_sample()
         {
             Magnetometer::get_sample();
@@ -183,7 +183,7 @@ class MS5837_30BA : public Barometer
         unsigned char _crc4(unsigned int n_prom[]);
 
 
-        int get_raw_data();
+        void get_raw_data();
         void setT(float Temperature)
         {
             this->Temperature = Temperature;

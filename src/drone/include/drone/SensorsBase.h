@@ -12,10 +12,11 @@ class Sensor
 {
     public:
 
-        void startup();
-        int get_raw_data();
+        virtual void startup() {}
+        virtual void get_raw_data() {}
+        virtual void calibrate() {}
 
-    // protected:
+    protected:
 
         static int get_value(unsigned int low, unsigned int high)
         {
@@ -43,99 +44,65 @@ class Sensor3Axis: public Sensor
 {
     public:
 
-        long x, y, z;
-        int range;
+        virtual int get_range() {}
+        virtual void getX(float &x, float &y ,float &z) {}
+        virtual void get_sample() {}
 
     protected:
 
-        Sensor3Axis()
-        {
-            this->x = 0;
-            this->y = 0;
-            this->z = 0;
-            this->range = 0;
-        }
-
-
-        void setX(long x, long y, long z)
-        {
-            this->x = x;
-            this->y = y;
-            this->z = z;
-        }
-
-        // auto getX()
-        // {
-        //     struct vector
-        //     {
-        //         long x, y, z;
-        //     };
-        //     return vector {this->x, this->y, this->z};
-        // }
-
-        void set_range(int input_range)
-        {
-            this->range = input_range;
-        }
-
-        int get_range()
-        {
-            return this->range;
-        }
+        virtual void setX(float x, float y, float z) {}
+        virtual void set_range(int range) {}       
 };
 
 
-class Accelerometer: public Sensor
+class Accelerometer: public Sensor3Axis
 {
+    private:
+
+        float ax, ay, az;
+        int range;
+
     public:
-
-        long ax, ay, az;
-        float axr, ayr, azr;
-        int accelerometer_range;
-
-
 
         Accelerometer()
         {
             this->ax = 0;
             this->ay = 0;
             this->az = 0;
-            this->accelerometer_range = 0;
+            this->range = 0;
         }
 
-    protected:
-
-        void setA(long ax, long ay, long az)
+        void getX(float &x, float &y ,float &z)
         {
-            this->ax = ax;
-            this->ay = ay;
-            this->az = az;
+            x = this->ax;
+            y = this->ay;
+            z = this->az;
         }
 
-        // auto getA()
-        // {
-        //     struct acceleration
-        //     {
-        //         long ax, ay, az;
-        //     };
-        //     return acceleration {this->ax, this->ay, this->az};
-        // }
-
-        void set_accelerometer_range(int sensor_range)
+        int get_range()
         {
-            this->accelerometer_range = sensor_range;
-        }
-
-        int get_accelerometer_range()
-        {
-            return this->accelerometer_range;
+            return this->range;
         }
 
         void get_sample()
         {
-            axr = convert(this->ax, this->accelerometer_range);
-            ayr = convert(this->ay, this->accelerometer_range);
-            azr = convert(this->az, this->accelerometer_range);
+            ax = convert(this->ax, this->range);
+            ay = convert(this->ay, this->range);
+            az = convert(this->az, this->range);
+        }
+
+    protected:
+
+        void setX(float x, float y, float z)
+        {
+            this->ax = x;
+            this->ay = y;
+            this->az = z;
+        }
+
+        void set_range(int range)
+        {
+            this->range = range;
         }
 
         void calibrate(int rounds)
@@ -150,11 +117,11 @@ class Accelerometer: public Sensor
                 get_raw_data();
                 get_sample();
 
-                std::cout << "ax = " << axr << " ay = " << ayr << " az = " << azr << endl;
+                std::cout << "ax = " << ax << " ay = " << ay << " az = " << az << endl;
 
-                axsum += axr;
-                aysum += ayr;
-                azsum += azr;
+                axsum += ax;
+                aysum += ay;
+                azsum += az;
                 usleep(25000);
             }
             axoffset = axsum / rounds;
@@ -164,56 +131,56 @@ class Accelerometer: public Sensor
 };
 
 
-class Gyroscope: public Sensor
+class Gyroscope: public Sensor3Axis
 {
+    private:
+
+        float gx, gy, gz;
+        int range;
+
     public:
-        long gx, gy, gz;
-        float gxr, gyr, gzr;
-        int gyroscope_range;
 
+        void getX(float &x, float &y ,float &z)
+        {
+            x = this->gx;
+            y = this->gy;
+            z = this->gz;
+        }
 
+        int get_range()
+        {
+            return this->range;
+        }
+
+        void get_sample()
+        {
+            gx = convert(this->gx, this->range);
+            gy = convert(this->gy, this->range);
+            gz = convert(this->gz, this->range);
+        }
 
         Gyroscope()
         {
             this->gx = 0;
             this->gy = 0;
             this->gz = 0;
-            this->gyroscope_range = 0;
+            this->range = 0;
         }
+
     protected:
-        void setG(long gx, long gy, long gz)
+
+        void setX(float x, float y, float z)
         {
-            this->gx = gx;
-            this->gy = gy;
-            this->gz = gz;
+            this->gx = x;
+            this->gy = y;
+            this->gz = z;
         }
 
-        // auto getG()
-        // {
-        //     struct rotation
-        //     {
-        //         long gx, gy, gz;
-        //     };
-        //     return rotation {this->gx, this->gy, this->gz};
-        // }
-
-        void set_gyroscope_range(int sensor_range)
+        void set_range(int range)
         {
-            this->gyroscope_range = sensor_range;
+            this->range = range;
         }
-
-        int get_gyroscope_range()
-        {
-            return this->gyroscope_range;
-        }
-
-        void get_sample()
-        {
-            gxr = convert(this->gx, this->gyroscope_range);
-            gyr = convert(this->gy, this->gyroscope_range);
-            gzr = convert(this->gz, this->gyroscope_range);
-        }
-
+        
         void calibrate(int rounds)
         {
             float gxsum = 0.0f, gysum = 0.0f, gzsum = 0.0f;
@@ -226,11 +193,11 @@ class Gyroscope: public Sensor
                 get_raw_data();
                 get_sample();
 
-                std::cout << "gx = " << gxr << " gy = " << gyr << " gz = " << gzr << endl;
+                std::cout << "gx = " << gx << " gy = " << gy << " gz = " << gz << endl;
 
-                gxsum += gxr;
-                gysum += gyr;
-                gzsum += gzr;
+                gxsum += gx;
+                gysum += gy;
+                gzsum += gz;
                 usleep(25000);
             }
             gxoffset = gxsum / rounds;
@@ -240,56 +207,55 @@ class Gyroscope: public Sensor
 };
 
 
-class Magnetometer: public Sensor
+class Magnetometer: public Sensor3Axis
 {
+    private:
+
+        float mx, my, mz;
+        int range;
+
     public:
 
-        long mx, my, mz;
-        float mxr, myr, mzr;
-        int magnetometer_range;
+        void getX(float &x, float &y ,float &z)
+        {
+            x = this->mx;
+            y = this->my;
+            z = this->mz;
+        }
 
-    protected:
+        int get_range()
+        {
+            return this->range;
+        }
+
+        void get_sample()
+        {
+            mx = convert(this->mx, this->range);
+            my = convert(this->my, this->range);
+            mz = convert(this->mz, this->range);
+        }
 
         Magnetometer()
         {
             this->mx = 0;
             this->my = 0;
             this->mz = 0;
-            this->magnetometer_range = 0;
+            this->range = 0;
         }
 
-        void setM(long mx, long my, long mz)
+    protected:
+
+        void setX(float x, float y, float z)
         {
-            this->mx = mx;
-            this->my = my;
-            this->mz = mz;
-        }
+            this->mx = x;
+            this->my = y;
+            this->mz = z;
+        }      
 
-        // auto getM()
-        // {
-        //     struct magnetic_inclination
-        //     {
-        //         long mx, my, mz;
-        //     };
-        //     return magnetic_inclination {this->mx, this->my, this->mz};
-        // }
-
-        void set_magnetometer_range(int sensor_range)
+        void set_range(int range)
         {
-            this->magnetometer_range = sensor_range;
-        }
-
-        int get_magnetometer_range()
-        {
-            return this->magnetometer_range;
-        }
-
-        void get_sample()
-        {
-            mxr = convert(this->mx, this->magnetometer_range);
-            myr = convert(this->my, this->magnetometer_range);
-            mzr = convert(this->mz, this->magnetometer_range);
-        }
+            this->range = range;
+        }       
 
         void calibrate(int rounds)
         {
@@ -307,15 +273,15 @@ class Magnetometer: public Sensor
                 get_raw_data();
                 get_sample();
 
-                std::cout << "mx = " << mxr << " my = " << myr << " mz = " << mzr << std::endl;
+                std::cout << "mx = " << mx << " my = " << my << " mz = " << mz << std::endl;
 
-                mxmin = min(mxmin, mxr);
-                mymin = min(mymin, myr);
-                mzmin = min(mzmin, mzr);
+                mxmin = min(mxmin, mx);
+                mymin = min(mymin, my);
+                mzmin = min(mzmin, mz);
 
-                mxmax = max(mxmax, mxr);
-                mymax = max(mymax, myr);
-                mzmax = max(mzmax, mzr);
+                mxmax = max(mxmax, mx);
+                mymax = max(mymax, my);
+                mzmax = max(mzmax, mz);
             }
             mxoffset = (mxmax + mxmin) / 2.0f;
             myoffset = (mymax + mymin) / 2.0f;
