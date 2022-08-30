@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   geometry_msgs
   message_generation
+  message_filters
 )
 
 ## System dependencies are found with CMake's conventions
@@ -120,11 +121,8 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 
-set(wiringPi_include "/usr/local/include")
-
 include_directories(
   include
-  ${wiringPi_include}
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -143,6 +141,7 @@ add_library(MadgwickFilter src/MadgwickFilter.cpp)
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(navigation src/navigation.cpp)
 add_executable(joystick_driver src/joystick_driver.cpp)
+add_executable(control src/control.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -162,11 +161,12 @@ target_link_libraries(
   sensors
   I2C
   MadgwickFilter
-  wiringPi
   ${catkin_LIBRARIES}
 )
 
 target_link_libraries(joystick_driver ${catkin_LIBRARIES})
+
+target_link_libraries(control ${catkin_LIBRARIES})
 
 #############
 ## Install ##

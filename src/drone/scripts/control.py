@@ -92,13 +92,6 @@ class Control:
         R_active = bool((pressed_buttons >> 8) & 0b0000000000000001)
         L_active = bool((pressed_buttons >> 7) & 0b0000000000000001)
 
-        # if self.dive_down:
-        #   current_depth = msg.depth
-        #   target_depth = current_depth - 15
-        #   not target_depth - 1 < current_depth < target_depth + 1:
-        #       dt = rospy.Time.now() - self.t
-        #       depth_power = self.pid_depth.control(navigation_msg.pose.position.z, dt)
-
         if A_active:
             self.power_hand.data = 1148
         elif D_active:

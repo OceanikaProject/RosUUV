@@ -1,61 +1,64 @@
 #include "ros/ros.h"
-#include "std_msgs/Int32MultiArray.h"
+#include "std_msgs/Int16.h"
+#include "drone/Joystick.h"
+#include "drone/Powers.h"
+#include "geometry_msgs/PoseStamped.h"
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <tf/transform_datatypes.h>
+#include <iostream>
 
 
-std_msgs::Int32MultiArray thrust;
-
-int lx, ly, rx, ry;
-// ros::NodeHandle n;
-// ros::Publisher pub = n.advertise<std_msgs::Int32MultiArray>("engines_topic", 1);
+using namespace std;
+using namespace message_filters;
 
 
-long map(long x, long in_min, long in_max, long out_min, long out_max)
+static inline int map(float x, int in_min, int, int in_max, int out_min, int out_max);
 {
-    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+    return static_cast<int>((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
 }
 
 
-void joystick_control_callback(const std_msgs::Int32MultiArray msg)
+void control_callback(const drone::JoystickConstPtr& joystick_msg, const geometry_msgs::PoseStampedConstPtr& navigation_msg)
 {
-    thrust.data.clear();
-    int lx = map(msg.data[0], 0, 1023, -100, 100);
-    int ly = map(msg.data[1], 0, 1023, -100, 100);
-    int rx = map(msg.data[2], 0, 1023, -100, 100);
-    int ry = map(msg.data[3], 0, 1023, -100, 100);
-    thrust.data.push_back(ly/2 + lx/2);
-    thrust.data.push_back(ly/2 + lx/2);
-    thrust.data.push_back(ry + rx);
-    thrust.data.push_back(ry - rx);
-    thrust.data.push_back(ly - lx);
+    drone::Powers powers_msg;
 
+    unsigned int pressed_buttons = joystick_msg->pressed_buttons;
 
-    // lx, ly, rx, ry
-    // lv, rv, lh, rh, bv
-    // [ly/2 + lx/2, ly/2 + lx/2, ry + rx, ry - rx, ly - lx]
+    bool A_active = (pressed_buttons >> 0) & 0b0000000000000001;
+    bool D_active = (pressed_buttons >> 3) & 0b0000000000000001;
+    bool R_active = (pressed_buttons >> 8) & 0b0000000000000001;
+    bool L_active = (pressed_buttons >> 7) & 0b0000000000000001;
+
+    // if (A_active)
+    // {
+    // power_hand.data = 1148;
+    // }
+    // else if (D_active)
+    // {
+    // power_hand.data = 1832
+    // }
+    // else
+    // {
+    // power_hand.data = 1488;
+    // }
+
+    cout << joystick_msg->left_y << " | " << joystick_msg->left_x << " | " << joystick_msg->right_y << " | " << joystick_msg->right_x << endl;
 }
 
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "engines");
-    ros::NodeHandle n;
-    ros::Subscriber sub = n.subscribe("esp", 1000, joystick_control_callback);
-    ros::Publisher pub = n.advertise<std_msgs::Int32MultiArray>("engines_topic", 1);
+    ros::init(argc, argv, "control");
+    ros::NodeHandle nh;
 
-    ros::Rate rate(10);
+    ros::Publisher pub_hand = nh.advertise<std_msgs::Int16>("hand_angle", 1);
+    std_msgs::Int16 power_hand;
 
-    while (ros::ok())
-    {
-    //     thrust.data.push_back(ly/2 + lx/2);
-    //     thrust.data.push_back(ly/2 + lx/2);
-    //     thrust.data.push_back(ry + rx);
-    //     thrust.data.push_back(ry - rx);
-    //     thrust.data.push_back(ly - lx);
-        pub.publish(thrust);
-        ros::spinOnce();
-        rate.sleep();
-   }
-
-    // ros::spin();
+    Subscriber<drone::Joystick> joystick_subscriber(nh, "joystick_state", 1);
+    Subscriber<geometry_msgs::PoseStamped> navigation_subscriber(nh, "talker_topic", 1);
+    TimeSynchronizer<drone::Joystick, geometry_msgs::PoseStamped> ts(joystick_subscriber, navigation_subscriber, 10);
+    ts.registerCallback(boost::bind(&control_callback, _1, _2));
+    ros::spin();
     return 0;
 }
