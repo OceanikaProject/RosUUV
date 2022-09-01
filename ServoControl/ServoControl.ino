@@ -11,7 +11,7 @@
 ros::NodeHandle  nh;
 
 const uint8_t engines_quantity = 5;
-const uint8_t pwm_pins[engines_quantity] = {3, 5, 6, 9, 10};
+const uint8_t pwm_pins[engines_quantity] = {3, 5, 6, 9, 10}; // 1 2 3 4 5
 int8_t powers[engines_quantity] = {0, 0, 0, 0, 0};
 Servo engines[engines_quantity];
 Servo light;
@@ -47,7 +47,7 @@ void servo_cb( const drone::Powers& cmd_msg)
       {
         for (uint8_t i = 0; i < engines_quantity; i++)
         {
-          engines[i].attach(pwm_pins[i], 1148, 1832);
+          engines[i].attach(pwm_pins[i], 1000, 2000);
         }
       }
       else

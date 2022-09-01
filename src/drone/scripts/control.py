@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 import rospy
 import message_filters
-import sys
 import serial
-import time
 import struct
 from std_msgs.msg import Int16
 from geometry_msgs.msg import PoseStamped
@@ -72,10 +70,39 @@ class Control:
         # self.pid_yaw = PID(2, 0, 0)
         self.pid_depth = PID(depth_gains['P'], depth_gains['I'], depth_gains['D'])
 
-        self.diving_up = False
-        self.diving_down = False
+        self.oceanic_yaml = "/home/ubuntu/drone_ros/src/drone/config/oceanic.yaml"
+        self.pid_yaml = "/home/ubuntu/drone_ros/src/drone/config/pid.yaml"
 
         self.t = rospy.Time.now()
+
+    def save_yaml(self):
+        import yaml
+
+        with open(self.oceanic_yaml, 'r') as f:
+            oceanic = yaml.safe_load(f)
+
+        oceanic["vertical_left"]["reversed"] = rospy.get_param("/vertical_left")["reversed"]
+        oceanic["vertical_right"]["reversed"] = rospy.get_param("/vertical_right")["reversed"]
+        oceanic["horizontal_left"]["reversed"] = rospy.get_param("/horizontal_left")["reversed"]
+        oceanic["horizontal_right"]["reversed"] = rospy.get_param("/horizontal_right")["reversed"]
+        oceanic["vertical_back"]["reversed"] = rospy.get_param("/vertical_back")["reversed"]
+
+        with open(self.oceanic_yaml, 'w') as f:
+            yaml.dump(oceanic, f, default_flow_style=False)
+
+        with open(self.pid_yaml, 'r') as f:
+            pid = yaml.safe_load(f)
+
+        pid["PidPitch"]["P"] = rospy.get_param("/PidPitch")["P"]
+        pid["PidPitch"]["I"] = rospy.get_param("/PidPitch")["I"]
+        pid["PidPitch"]["D"] = rospy.get_param("/PidPitch")["D"]
+        pid["PidDepth"]["P"] = rospy.get_param("/PidDepth")["P"]
+        pid["PidDepth"]["I"] = rospy.get_param("/PidDepth")["I"]
+        pid["PidDepth"]["D"] = rospy.get_param("/PidDepth")["D"]
+
+        with open(self.pid_yaml, 'w') as f:
+            yaml.dump(pid, f, default_flow_style=False)
+
 
     @staticmethod
     def map(x, in_min, in_max, out_min, out_max):
@@ -160,14 +187,29 @@ class Control:
 
         dt = rospy.Time.now() - self.t
 
+
+        vertical_left_params = rospy.get_param('vertical_left')
+        vertical_right_params = rospy.get_param('vertical_right')
+        horizontal_left_params = rospy.get_param('horizontal_left')
+        horizontal_right_params = rospy.get_param('horizontal_right')
+        vertical_back_params = rospy.get_param('vertical_back')
+
+        vertical_left_direction = -1 if vertical_left_params["reversed"] else 1
+        vertical_right_direction = -1 if vertical_right_params["reversed"] else 1
+        horizontal_left_direction = -1 if horizontal_left_params["reversed"] else 1
+        horizontal_right_direction = -1 if horizontal_right_params["reversed"] else 1
+        vertical_back_direction = -1 if vertical_back_params["reversed"] else 1
+
+
+
         if stabilization_on:
             if lx in range(-5, 6) and ly in range(-5, 6):
                 pitch_power = self.pid_pitch.control(pitch, dt)
                 depth_power = self.pid_depth.control(navigation_msg.pose.position.z, dt)
 
-                left_alt_pwm = (pitch_power / 2 + depth_power / 2) / 2
-                right_alt_pwm = (pitch_power / 2 + depth_power / 2) / 2
-                back_alt_pwm = depth_power - pitch_power
+                left_alt_pwm = depth_power / 2
+                right_alt_pwm = depth_power / 2
+                back_alt_pwm = depth_power
 
                 self.serial_frame["data"][0] = left_alt_pwm
                 self.serial_frame["data"][1] = right_alt_pwm
@@ -201,11 +243,13 @@ class Control:
         self.serial_frame["data"][2] = left_heading_pwm
         self.serial_frame["data"][3] = right_heading_pwm
 
-        self.serial_frame["data"][0] = int(self.serial_frame["data"][0])
-        self.serial_frame["data"][1] = int(self.serial_frame["data"][1])
-        self.serial_frame["data"][2] = int(self.serial_frame["data"][2])
-        self.serial_frame["data"][3] = int(self.serial_frame["data"][3])
-        self.serial_frame["data"][4] = int(self.serial_frame["data"][4])
+        self.serial_frame["data"][0] = int(self.serial_frame["data"][0]) * vertical_right_direction # d3  motor3
+        self.serial_frame["data"][1] = int(self.serial_frame["data"][1]) * vertical_left_direction # d5  motor4
+        self.serial_frame["data"][2] = int(self.serial_frame["data"][2]) * horizontal_right_direction # d6  motor1
+        self.serial_frame["data"][3] = int(self.serial_frame["data"][3]) * horizontal_left_direction # d9  motor2
+        self.serial_frame["data"][4] = int(self.serial_frame["data"][4]) * vertical_back_direction # d10 motor5
+
+        print(self.serial_frame["data"])
 
         self.t = rospy.Time.now()
 
@@ -214,8 +258,8 @@ class Control:
         while not rospy.is_shutdown():
             self.serial_frame["crc"] = 0
             for i in range(self.serial_frame["len"]):
-                
                 self.serial_frame["crc"] = self.serial_frame["crc"] ^ (int(self.serial_frame["data"][i]) & 0b11111111)
+            print(self.serial_frame["crc"])
             msg = struct.pack(
                 "2B8b1B",
                 self.serial_frame["header"],
@@ -233,15 +277,27 @@ class Control:
             self.arduino.write(msg)
             self.pub_hand.publish(self.power_hand)
             rate.sleep()
+        self.save_yaml()
         # rospy.spin()
 
 
 if __name__ == '__main__':
     ctrl = Control()
     try:
+        rospy.loginfo("START")
         ctrl.run()
+        
     except rospy.ROSInterruptException:
-        pass
+        rospy.loginfo("FINISH")
+        import yaml
+
+        with open('/home/ubuntu/drone_ros/src/drone/config/oceanic.yaml', 'r') as f:
+            oceanic_yaml = yaml.safe_load(f)
+        
+        oceanic_yaml['vertical_left']['reversed'] = rospy.get_param('vertical_left')['reversed']
+
+        with open('/home/ubuntu/drone_ros/src/drone/config/oceanic.yaml', 'w') as f:
+            yaml.dump(oceanic_yaml, f, default_flow_style=False)
 
 
 

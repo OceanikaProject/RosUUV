@@ -16,7 +16,7 @@ class JoystickRepeater:
 
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.bind(("192.168.1.84", 1234))
+        self.sock.bind(("192.168.88.1", 1234))
 
     def parse(self, esp8266_data):
         print(esp8266_data[0])

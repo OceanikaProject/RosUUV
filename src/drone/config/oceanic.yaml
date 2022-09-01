@@ -1,12 +1,21 @@
-motor_order1: 3
-motor_order2: -4
-motor_order3: 1
-motor_order4: -2
-motor_order5: 5
-motor_order6: 6
+coef_forward: 1
 coef_front_back: 1
+coef_turn: 1
+coef_up: 1
+horizontal_left:
+  pin: 9
+  reversed: false
+horizontal_right:
+  pin: 6
+  reversed: false
 pitch_resist_coef: 50
 up_down_power_coef: 1
-coef_forward: 1
-coef_up: 1
-coef_turn: 1
+vertical_back:
+  esc: 10
+  reversed: true
+vertical_left:
+  pin: 5
+  reversed: false
+vertical_right:
+  pin: 3
+  reversed: false

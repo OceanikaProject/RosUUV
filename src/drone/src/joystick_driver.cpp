@@ -32,7 +32,9 @@ int main(int argc, char **argv)
 
      serv.sin_family = AF_INET;
      serv.sin_port = htons(1234);
-     serv.sin_addr.s_addr = inet_addr("192.168.1.84");
+    //  serv.sin_addr.s_addr = inet_addr("192.168.1.84");
+    serv.sin_addr.s_addr = inet_addr("192.168.88.1");
+
 
      bind(sockfd,(struct sockaddr *)&serv,sizeof(serv));
 

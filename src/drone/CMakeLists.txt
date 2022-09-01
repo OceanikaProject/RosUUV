@@ -141,7 +141,7 @@ add_library(MadgwickFilter src/MadgwickFilter.cpp)
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(navigation src/navigation.cpp)
 add_executable(joystick_driver src/joystick_driver.cpp)
-add_executable(control src/control.cpp)
+#add_executable(control src/control.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -166,7 +166,7 @@ target_link_libraries(
 
 target_link_libraries(joystick_driver ${catkin_LIBRARIES})
 
-target_link_libraries(control ${catkin_LIBRARIES})
+#target_link_libraries(control ${catkin_LIBRARIES})
 
 #############
 ## Install ##
@@ -178,7 +178,7 @@ target_link_libraries(control ${catkin_LIBRARIES})
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-  scripts/navigation.py
+#  scripts/navigation.py
   scripts/joystick_driver.py
   scripts/control.py
   scripts/hand.py

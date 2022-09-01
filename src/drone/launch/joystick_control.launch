@@ -2,9 +2,9 @@
 
     <rosparam command="load" file="$(find drone)/config/pid.yaml" />
     <rosparam command="load" file="$(find drone)/config/oceanic.yaml" />
-    <include file="$(find raspicam_node)/launch/camerav2_320x240_30fps.launch">
+    <!-- <include file="$(find raspicam_node)/launch/camerav2_320x240_30fps.launch">
         <arg name="enable_raw" value="true" />
-    </include>
+    </include> -->
      <node pkg="drone" type="joystick_driver" name="joystick_driver"></node>
      <node pkg="drone" type="navigation" name="talker_node"/>
    
@@ -13,10 +13,10 @@
    <!-- <node pkg="drone" type="hand.py" name="hand" output="screen"/>
 
     <include file="$(find drone_description)/launch/viz.launch" />-->
-    <node pkg="web_video_server" type="web_video_server" name="web_video_server">
+    <!-- <node pkg="web_video_server" type="web_video_server" name="web_video_server">
         <param name="port" value="8081" />
         <param name="address" value="192.168.1.84" />
-    </node>
-    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
+    </node> -->
+    <!-- <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" /> -->
     
 </launch>
