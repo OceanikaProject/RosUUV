@@ -8,8 +8,7 @@
      <node pkg="drone" type="joystick_driver" name="joystick_driver"></node>
      <node pkg="drone" type="navigation" name="talker_node"/>
    
-    <node pkg="drone" type="control.py" name="control" output="screen">
-    </node>
+   <!--  <node pkg="drone" type="control.py" name="control" output="screen"></node> -->
    <!-- <node pkg="drone" type="hand.py" name="hand" output="screen"/>
 
     <include file="$(find drone_description)/launch/viz.launch" />-->
@@ -17,6 +16,6 @@
         <param name="port" value="8081" />
         <param name="address" value="192.168.1.84" />
     </node> -->
-    <!-- <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" /> -->
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
     
 </launch>

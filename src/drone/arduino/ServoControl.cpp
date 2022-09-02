@@ -147,11 +147,11 @@ void loop()
       int ret = parseByte(Serial.read());
       if (ret == 1)
       {
-        powers.left_alt_power = map(pack.data[0], -100, 100, 1148, 1832);
-	powers.right_alt_power = map(pack.data[1], -100, 100, 1148, 1832);
-	powers.left_heading_power = map(pack.data[2], -100, 100, 1148, 1832);
-        powers.right_heading_power = map(pack.data[3], -100, 100, 1148, 1832);
-        powers.back_alt_power = map(pack.data[4], -100, 100, 1148, 1832);
+        powers.left_alt_power = map(pack.data[0], -100, 100, 1000, 2000);
+	      powers.right_alt_power = map(pack.data[1], -100, 100, 1000, 2000);
+	      powers.left_heading_power = map(pack.data[2], -100, 100, 1000, 2000);
+        powers.right_heading_power = map(pack.data[3], -100, 100, 1000, 2000);
+        powers.back_alt_power = map(pack.data[4], -100, 100, 1000, 2000);
         powers.light = pack.data[5];
         powers.lock = (bool) pack.data[6];
         printPowers();
@@ -159,17 +159,17 @@ void loop()
 
       if (!powers.lock)
       {
-	for (uint8_t i = 0; i < engines_quantity; i++)
-	{
-	  engines[i].attach(pwm_pins[i], 1000, 2000);
-	}
+        for (uint8_t i = 0; i < engines_quantity; i++)
+        {
+          engines[i].attach(pwm_pins[i], 1000, 2000);
+        }
       }
       else
       {
-	for (uint8_t i = 0; i < engines_quantity; i++)
-	{
-	  engines[i].detach();
-	}
+        for (uint8_t i = 0; i < engines_quantity; i++)
+        {
+          engines[i].detach();
+        }
       }
 
       engines[0].write(powers.left_alt_power);
@@ -177,7 +177,25 @@ void loop()
       engines[2].write(powers.left_heading_power);
       engines[3].write(powers.right_heading_power);
       engines[4].write(powers.back_alt_power);
-      analogWrite(11, powers.light);
+      // analogWrite(11, powers.light);
+    
+
+      if (powers.light == 0)
+      {
+        analogWrite(11, 0);
+      } 
+      else if (powers.light == 1)
+      {
+        analogWrite(11, 1000);
+      }
+      else if (powers.light == 2)
+      {
+        analogWrite(11, 1500);
+      }
+      else if (powers.light == 3)
+      {
+        analogWrite(11, 2000);
+      }
     }
   }
   delay(100);

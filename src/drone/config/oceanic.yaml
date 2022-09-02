@@ -9,6 +9,7 @@ horizontal_right:
   pin: 6
   reversed: false
 pitch_resist_coef: 50
+ros_ip_address: 192.168.88.1
 up_down_power_coef: 1
 vertical_back:
   esc: 10
@@ -18,4 +19,4 @@ vertical_left:
   reversed: false
 vertical_right:
   pin: 3
-  reversed: false
+  reversed: true

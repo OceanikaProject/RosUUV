@@ -7,6 +7,7 @@ from std_msgs.msg import Int16
 from geometry_msgs.msg import PoseStamped
 from drone.msg import Joystick, Powers
 from tf.transformations import euler_from_quaternion
+from math import atan2, asin
 
 
 class PID:
@@ -39,6 +40,11 @@ class PID:
 
     def set_target(self, target):
         self.target = target
+
+    def set_gains(self, P, I, D):
+        self.Kp = P
+        self.Ki = I
+        self.Kd = D
 
 
 class Control:
@@ -107,6 +113,12 @@ class Control:
     @staticmethod
     def map(x, in_min, in_max, out_min, out_max):
         return int((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min)
+    
+    @staticmethod
+    def constrain(x, higher_limit, lower_limit):
+        if x > higher_limit: x = higher_limit
+        if x < lower_limit: x = lower_limit
+        return x
 
     def control_callback(self, joystick_msg, navigation_msg):
 
@@ -124,7 +136,7 @@ class Control:
         elif D_active:
             self.power_hand.data = 1832
         else:
-            self.power_hand.data = 1488
+            self.power_hand.data = 1484
 
         speed_mode = joystick_msg.SpeedMode
         light_mode = joystick_msg.LightMode
@@ -163,27 +175,39 @@ class Control:
         # 00010010 - 18 - lock off, stabilization off, tangage on
         # 00010011 - 19 - lock off, stabilization on, tangage on
 
-        if light_mode == 0:
-            self.powers_msg.Light_pwm = 0
-        elif light_mode == 1:
-            self.powers_msg.Light_pwm = 1000
-        elif light_mode == 2:
-            self.powers_msg.Light_pwm = 1500
-        elif light_mode == 3:
-            self.powers_msg.Light_pwm = 2000
+        # if light_mode == 0:
+        #     self.powers_msg.Light_pwm = 0
+        # elif light_mode == 1:
+        #     self.powers_msg.Light_pwm = 1000
+        # elif light_mode == 2:
+        #     self.powers_msg.Light_pwm = 1500
+        # elif light_mode == 3:
+        #     self.powers_msg.Light_pwm = 2000
 
-        roll, pitch, yaw = euler_from_quaternion([
-            navigation_msg.pose.orientation.x,
-            navigation_msg.pose.orientation.y,
-            navigation_msg.pose.orientation.z,
-            navigation_msg.pose.orientation.w
-        ])
+        self.serial_frame["data"][5] = light_mode
 
-        roll = roll * 57.2958
-        pitch = pitch * 57.2958
-        yaw = yaw * 57.2958
+        #roll, pitch, yaw = euler_from_quaternion([
+        #    navigation_msg.pose.orientation.x,
+        #    navigation_msg.pose.orientation.y,
+        #    navigation_msg.pose.orientation.z,
+        #    navigation_msg.pose.orientation.w
+        #])
 
-        # print(roll, pitch, yaw)
+        #roll = roll * 57.2958
+        #pitch = pitch * 57.2958
+        #yaw = yaw * 57.2958
+
+        q0 = navigation_msg.pose.orientation.w
+        q1 = navigation_msg.pose.orientation.x
+        q2 = navigation_msg.pose.orientation.y
+        q3 = navigation_msg.pose.orientation.z
+
+        pitch = atan2(2*q2*q3 - 2*q0*q1, 2*q0*q0 + 2*q3*q3 - 1)
+        roll = -asin(2*q1*q3 + 2*q0*q2)
+        yaw = atan2(2*q1*q2 - 2*q0*q3, 2*q0*q0 + 2*q1*q1 - 1)
+
+        pitch *= 57.2958
+        print(roll, pitch, yaw)
 
         dt = rospy.Time.now() - self.t
 
@@ -200,23 +224,27 @@ class Control:
         horizontal_right_direction = -1 if horizontal_right_params["reversed"] else 1
         vertical_back_direction = -1 if vertical_back_params["reversed"] else 1
 
+        depth_gains = rospy.get_param('PidDepth')
+        pitch_gains = rospy.get_param('PidPitch')
+        self.pid_depth.set_gains(depth_gains['P'], depth_gains['I'], depth_gains['D'])
+        self.pid_pitch.set_gains(pitch_gains['P'], pitch_gains['I'], pitch_gains['D'])
 
-
+        #rospy.loginfo("stabilization_on %s" % str(stabilization_on))
         if stabilization_on:
-            if lx in range(-5, 6) and ly in range(-5, 6):
+            if lx in range(-12, 13) and ly in range(-12, 13):
                 pitch_power = self.pid_pitch.control(pitch, dt)
-                depth_power = self.pid_depth.control(navigation_msg.pose.position.z, dt)
-
-                left_alt_pwm = depth_power / 2
-                right_alt_pwm = depth_power / 2
-                back_alt_pwm = depth_power
+                depth_power = -self.pid_depth.control(navigation_msg.pose.position.z, dt)
+                rospy.loginfo("depth_power %f | pitch_power %f, pitch %f" , depth_power , pitch_power, pitch)
+                left_alt_pwm = depth_power + pitch_power
+                right_alt_pwm = depth_power + pitch_power
+                back_alt_pwm = depth_power - pitch_power
 
                 self.serial_frame["data"][0] = left_alt_pwm
                 self.serial_frame["data"][1] = right_alt_pwm
                 self.serial_frame["data"][4] = back_alt_pwm
             else:
-                left_alt_pwm = ly / 2 + lx / 2
-                right_alt_pwm = ly / 2 + lx / 2
+                left_alt_pwm = ly + lx
+                right_alt_pwm = ly + lx
                 back_alt_pwm = ly - lx
 
                 self.serial_frame["data"][0] = left_alt_pwm
@@ -229,8 +257,8 @@ class Control:
                 self.pid_depth.set_target(navigation_msg.pose.position.z)
 
         else:
-            left_alt_pwm = ly / 2 + lx / 2
-            right_alt_pwm = ly / 2 + lx / 2
+            left_alt_pwm = ly + lx
+            right_alt_pwm = ly + lx
             back_alt_pwm = ly - lx
 
             self.serial_frame["data"][0] = left_alt_pwm
@@ -243,40 +271,58 @@ class Control:
         self.serial_frame["data"][2] = left_heading_pwm
         self.serial_frame["data"][3] = right_heading_pwm
 
-        self.serial_frame["data"][0] = int(self.serial_frame["data"][0]) * vertical_right_direction # d3  motor3
-        self.serial_frame["data"][1] = int(self.serial_frame["data"][1]) * vertical_left_direction # d5  motor4
-        self.serial_frame["data"][2] = int(self.serial_frame["data"][2]) * horizontal_right_direction # d6  motor1
-        self.serial_frame["data"][3] = int(self.serial_frame["data"][3]) * horizontal_left_direction # d9  motor2
-        self.serial_frame["data"][4] = int(self.serial_frame["data"][4]) * vertical_back_direction # d10 motor5
+        self.serial_frame["data"][0] = Control.constrain(int(self.serial_frame["data"][0] * vertical_right_direction * 0.8), 100, -100) # d3  motor3
+        self.serial_frame["data"][1] = Control.constrain(int(self.serial_frame["data"][1] * vertical_left_direction * 0.8), 100, -100) # d5  motor4
+        self.serial_frame["data"][2] = Control.constrain(int(self.serial_frame["data"][2] * horizontal_right_direction), 100, -100) # d6  motor1
+        self.serial_frame["data"][3] = Control.constrain(int(self.serial_frame["data"][3] * horizontal_left_direction), 100, -100) # d9  motor2
+        self.serial_frame["data"][4] = Control.constrain(int(self.serial_frame["data"][4] * vertical_back_direction), 100, -100) # d10 motor5
 
-        print(self.serial_frame["data"])
+        #print(self.serial_frame["data"])
 
         self.t = rospy.Time.now()
 
     def run(self):
         rate = rospy.Rate(10)
         while not rospy.is_shutdown():
-            self.serial_frame["crc"] = 0
-            for i in range(self.serial_frame["len"]):
-                self.serial_frame["crc"] = self.serial_frame["crc"] ^ (int(self.serial_frame["data"][i]) & 0b11111111)
-            print(self.serial_frame["crc"])
-            msg = struct.pack(
-                "2B8b1B",
-                self.serial_frame["header"],
-                self.serial_frame["len"],
-                self.serial_frame["data"][0],
-                self.serial_frame["data"][1],
-                self.serial_frame["data"][2],
-                self.serial_frame["data"][3],
-                self.serial_frame["data"][4],
-                self.serial_frame["data"][5],
-                self.serial_frame["data"][6],
-                self.serial_frame["data"][7],
-                self.serial_frame["crc"]
-            )
-            self.arduino.write(msg)
-            self.pub_hand.publish(self.power_hand)
-            rate.sleep()
+            try:
+                self.serial_frame["crc"] = 0
+                for i in range(self.serial_frame["len"]):
+                    self.serial_frame["crc"] = self.serial_frame["crc"] ^ (int(self.serial_frame["data"][i]) & 0b11111111)
+                #print(self.serial_frame["crc"])
+                msg = struct.pack(
+                    "2B8b1B",
+                    self.serial_frame["header"],
+                    self.serial_frame["len"],
+                    self.serial_frame["data"][0],
+                    self.serial_frame["data"][1],
+                    self.serial_frame["data"][2],
+                    self.serial_frame["data"][3],
+                    self.serial_frame["data"][4],
+                    self.serial_frame["data"][5],
+                    self.serial_frame["data"][6],
+                    self.serial_frame["data"][7],
+                    self.serial_frame["crc"]
+                )
+                self.arduino.write(msg)
+                self.pub_hand.publish(self.power_hand)
+                rate.sleep()
+            except rospy.ROSException as e:
+                rospy.logerr(e)
+                rospy.loginfo(e)
+            except rospy.ROSSerializationException as e:
+                rospy.logerrr(e)
+            except rospy.ROSInitException as e:
+                rospy.logerr(e)
+            except rospy.ROSInterruptException as e:
+                rospy.logerr(e)
+            except rospy.ROSInternalException as e:
+                rospy.logerr(e)
+            except rospy.ServiceException as e:
+                rospy.logerr(e)
+            except KeyboardInterrupt as e:
+                rospy.loginfo(e)
+                rospy.logerr(e)
+        rospy.loginfo("Out of loop")
         self.save_yaml()
         # rospy.spin()
 
@@ -288,16 +334,17 @@ if __name__ == '__main__':
         ctrl.run()
         
     except rospy.ROSInterruptException:
-        rospy.loginfo("FINISH")
-        import yaml
+        pass
+        # rospy.loginfo("FINISH")
+        # import yaml
 
-        with open('/home/ubuntu/drone_ros/src/drone/config/oceanic.yaml', 'r') as f:
-            oceanic_yaml = yaml.safe_load(f)
+        # with open('/home/ubuntu/drone_ros/src/drone/config/oceanic.yaml', 'r') as f:
+        #     oceanic_yaml = yaml.safe_load(f)
         
-        oceanic_yaml['vertical_left']['reversed'] = rospy.get_param('vertical_left')['reversed']
+        # oceanic_yaml['vertical_left']['reversed'] = rospy.get_param('vertical_left')['reversed']
 
-        with open('/home/ubuntu/drone_ros/src/drone/config/oceanic.yaml', 'w') as f:
-            yaml.dump(oceanic_yaml, f, default_flow_style=False)
+        # with open('/home/ubuntu/drone_ros/src/drone/config/oceanic.yaml', 'w') as f:
+        #     yaml.dump(oceanic_yaml, f, default_flow_style=False)
 
 
 

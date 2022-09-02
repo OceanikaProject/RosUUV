@@ -10,7 +10,7 @@ pi = pigpio.pi()
 
 
 def callback(power):
-    pi.set_servo_pulsewidth(13, power.data)
+    pi.set_servo_pulsewidth(12, power.data)
     print("callback", power.data)
 
 

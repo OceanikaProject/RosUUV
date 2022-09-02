@@ -31,6 +31,24 @@ int main(int argc, char **argv)
     ros::Publisher pub = n.advertise<geometry_msgs::PoseStamped>("talker_topic", 1000);
     ros::Rate loop_rate(10);
 
+    const bool DEBUG = n.hasParam("/talker_node/DEBUG");
+    
+
+    static ros::Publisher acceleration_pub;
+    static ros::Publisher rotation_pub;
+    static ros::Publisher magnetism_pub;
+    static ros::Publisher euler_pub;
+    
+
+   if (DEBUG)
+   {
+    acceleration_pub = n.advertise<geometry_msgs::Vector3>("acceleration", 1000);
+    rotation_pub = n.advertise<geometry_msgs::Vector3>("rotation", 1000);
+    magnetism_pub = n.advertise<geometry_msgs::Vector3>("magnetism", 1000);
+    euler_pub = n.advertise<geometry_msgs::Vector3>("euler", 1000);
+   }
+
+
    MPU6050 imu;
    QMC5883 compass;
    MS5837_30BA bar;
@@ -72,6 +90,35 @@ int main(int argc, char **argv)
         // msg.z = 3;
 
         geometry_msgs::PoseStamped msg;
+
+        if (DEBUG)
+        {
+            geometry_msgs::Vector3 acceleration_msg;
+            geometry_msgs::Vector3 rotation_msg;
+            geometry_msgs::Vector3 magnetism_msg;
+            geometry_msgs::Vector3 euler_msg;
+
+            acceleration_msg.x = ax;
+            acceleration_msg.y = ay;
+            acceleration_msg.z = az;
+
+            rotation_msg.x = gx;
+            rotation_msg.y = gy;
+            rotation_msg.z = gz;
+
+            magnetism_msg.x = mx;
+            magnetism_msg.y = my;
+            magnetism_msg.z = mz;
+
+            euler_msg.x = ahrs.getRoll();
+            euler_msg.y = ahrs.getPitch();
+            euler_msg.z = ahrs.getYaw();
+
+            acceleration_pub.publish(acceleration_msg);
+            rotation_pub.publish(rotation_msg);
+            magnetism_pub.publish(magnetism_msg);
+            euler_pub.publish(euler_msg);
+        }
 
         msg.pose.orientation.w = ahrs.q0;
         msg.pose.orientation.x = ahrs.q1;
