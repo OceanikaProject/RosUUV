@@ -3,3 +3,4 @@ build/
 .idea/
 .catkin_workspace
 src/CMakeLists.txt
+serverjs/node_modules/
