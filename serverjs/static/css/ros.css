@@ -1,0 +1,83 @@
+#joystick-panel {
+    padding: 10px;
+    border: 1px solid;
+    position: relative;
+    margin-top: 15px;
+    height: 300px;
+    width: 100%;
+    background-color: #ff0050;
+}
+
+.left-joystick-position {
+    position: absolute;
+    top: 150px;
+    left: 20%;
+}
+
+.right-joystick-position {
+    position: absolute;
+    top: 150px;
+    left: 80%;
+    margin: 0 auto;
+}
+
+.buttonA-position {
+    position: absolute;
+    top: 200px;
+    left: 33%
+    
+}
+
+.buttonB-position {
+    position: absolute;
+    top: 150px;
+    left: 40%;
+}
+
+.buttonC-position {
+    position: absolute;
+    top: 150px;
+    right: 40%;
+}
+
+.buttonD-position {
+    position: absolute;
+    top: 200px;
+    right: 33%;
+}
+
+.buttonHold-position {
+    position: absolute;
+    top: 100px;
+    left: 40%;
+}
+
+.buttonLed-position {
+    position: absolute;
+    top: 100px;
+    right: 40%;
+}
+
+.buttonLeft-position {
+    position: absolute;
+    top: 40px;
+    left: 15%;
+}
+
+.buttonRight-position {
+    position: absolute;
+    top: 40px;
+    right: 15%;
+}
+
+.buttonLsw-position {
+    position: absolute;
+    top: 135px;
+    left: 5%;
+}
+
+.buttonRsw-position {
+    position: absolute;
+    top: 135px;
+    right: 5%;
+}

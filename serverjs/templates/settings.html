@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="/css/styles.css'">
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" >
+
+    <title>Title</title>
+</head>
+<body>
+<div class="box body-container">
+    <table class="table table-hover table-sm align-middle">
+    {% for key, value in data.items() %}
+        {% if value is mapping %}
+            <tr>
+                <td colspan="2">{{ key }}:</td>
+            </tr>
+            {% for subkey, subvalue in value.items() %}
+                <tr>
+                    <td class="pl-5">{{ subkey }}</td>
+                    <td>{{ subvalue }}</td>
+                </tr>
+            {% endfor %}
+        {% else %}
+        <tr>
+            <td>{{ key }}</td>
+            <td>{{ value }}</td>
+        </tr>
+        {% endif %}
+    {% endfor %}
+    </table>
+
+    <hr/>
+    
+    <div class="accordion" id="settingsAccordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="oceanicHeading">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#oceanicCollapse" aria-expanded="true" aria-controls="oceanicCollapse">
+                    oceanic.ini
+                </button>
+            </h2>
+            <div id="oceanicCollapse" class="accordion-collapse collapse" aria-labelledby="oceanicHeading" data-bs-parent="#settingsAccordion">
+                <div class="accordion-body">
+                    <form method="post" id="oceanic_form">
+
+                        <div class="form-group">
+                            <label for="motor_order1" class="form-label">
+                                motor_order1
+                                <input id="motor_order1" class="form-control form-number" type="number" value="3" name="motor_order1" min="-6" max="6" step="1" />
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="motor_order2" class="form-label">
+                                motor_order2
+                                <input id="motor_order2" class="form-control form-number" type="number" value="-4" name="motor_order2" min="-6" max="6" step="1" />
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="motor_order3" class="form-label">
+                                motor_order3
+                                <input id="motor_order3" class="form-control form-number" type="number" value="1" name="motor_order3" min="-6" max="6" step="1" />
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="motor_order4" class="form-label">
+                                motor_order4
+                                <input id="motor_order4" class="form-control form-number" type="number" value="-2" name="motor_order4" min="-6" max="6" step="1" />
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="motor_order5" class="form-label">
+                                motor_order5
+                                <input id="motor_order5" class="form-control form-number" type="number" value="5" name="motor_order5" min="-6" max="6" step="1" />
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="motor_order6" class="form-label">
+                                motor_order6
+                                <input id="motor_order6" class="form-control form-number" type="number" value="6" name="motor_order6" min="-6" max="6" step="1" />
+                            </label>
+                        </div>
+                        <div class="form-group form-group-range">
+                            <span class="d-inline-block limit-left">0</span>
+                            <label for="coef_front_back" class="form-label range-wrap">
+                                coef_front_back
+                                <input id="coef_front_back" class="form-range align-middle" type="range" min="0" max="1" step="0.01" value="1" name="hand" >
+    <!--                            <output class="bubble"></output>-->
+                            </label>
+                            <span class="d-inline-block limit-right">1</span>
+                            <input id="coef_front_back_number" class="form-control form-text range-number" type="number" min="0" max="1" step="0.01" value="1">
+                        </div>
+                        <div class="form-group form-group-range">
+                            <span class="d-inline-block limit-left">0</span>
+                            <label for="pitch_resist_coef" class="form-label range-wrap">
+                                pitch_resist_coef
+                                <input id="pitch_resist_coef" class="form-range align-middle" type="range" min="0" max="50" step="1" value="50" name="pitch_resist_coef" >
+    <!--                            <output class="bubble"></output>-->
+                            </label>
+                            <span class="d-inline-block limit-right">50</span>
+                            <input id="pitch_resist_coef_number" class="form-control form-text range-number" type="number" min="0" max="50" step="1" value="50">
+                        </div>
+                        <div class="form-group form-group-range">
+                            <span class="d-inline-block limit-left">0</span>
+                            <label for="up_down_power_coef" class="form-label range-wrap">
+                                up_down_power_coef
+                                <input id="up_down_power_coef" class="form-range align-middle" type="range" min="0" max="1" step="0.01" value="1" name="up_down_power_coef" >
+    <!--                            <output class="bubble"></output>-->
+                            </label>
+                            <span class="d-inline-block limit-right">1</span>
+                            <input id="up_down_power_coef_number" class="form-control form-text range-number" type="number" min="0" max="1" step="0.01" value="1">
+                        </div>
+                        <div class="form-group form-group-range">
+                            <span class="d-inline-block limit-left">0</span>
+                            <label for="coef_forward" class="form-label range-wrap">
+                                coef_forward
+                                <input id="coef_forward" class="form-range align-middle" type="range" min="0" max="1" step="0.01" value="1" name="coef_forward" >
+<!--                                <output class="bubble"></output>-->
+                            </label>
+                            <span class="d-inline-block limit-right">1</span>
+                            <input id="coef_forward_number" class="form-control form-text range-number" type="number" min="0" max="1" step="0.01" value="1">
+                        </div>
+                        <div class="form-group form-group-range">
+                            <span class="d-inline-block limit-left">0</span>
+                            <label for="coef_up" class="form-label range-wrap">
+                                coef_up
+                                <input id="coef_up" class="form-range align-middle" type="range" min="0" max="1" step="0.01" value="1" name="coef_up" >
+    <!--                            <output class="bubble"></output>-->
+                            </label>
+                            <span class="d-inline-block limit-right">1</span>
+                            <input id="coef_up_number" class="form-control form-text range-number" type="number" min="0" max="1" step="0.01" value="1">
+                        </div>
+                        <div class="form-group form-group-range">
+                            <span class="d-inline-block limit-left">0</span>
+                            <label for="coef_turn" class="form-label range-wrap">
+                                coef_turn
+                                <input id="coef_turn" class="form-range align-middle" type="range" min="0.00" max="1.00" step="0.01" value="1.00" name="coef_turn" >
+<!--                                <output class="bubble"></output>-->
+                            </label>
+                            <span class="d-inline-block limit-right">1</span>
+                            <input id="coef_turn_number" class="form-control form-text range-number" type="number" min="0.00" max="1.00" step="0.01" value="1.00">
+                        </div>
+                        <button class="btn btn-primary" type="submit">Сохранить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="pidHeading">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#pidCollapse" aria-expanded="true" aria-controls="pidCollapse">
+                    pid.ini
+                </button>
+            </h2>
+            <div id="pidCollapse" class="accordion-collapse collapse" aria-labelledby="pidHeading" data-bs-parent="#settingsAccordion">
+                <div class="accordion-body">
+                    <form method="post" id="pid_form">
+                        <h3>Depth</h3>
+                        <div class="form-group form-group-range">
+                            <span class="d-inline-block limit-left">1000</span>
+                            <label for="depthP" class="form-label range-wrap">
+                                Proportional
+                                <input id="depthP" class="form-range align-middle" type="range" min="1000" max="4000" step="0.1" value="1000" name="depthP" >
+<!--                                <output class="bubble"></output>-->
+                            </label>
+                            <span class="d-inline-block limit-right">4000</span>
+                            <input id="depthP_number" class="form-control form-text range-number" type="number" min="1000" max="4000" step="0.1" value="1000">
+                        </div>
+                        <div class="form-group form-group-range">
+                            <span class="d-inline-block limit-left">0</span>
+                            <label for="depthI" class="form-label range-wrap">
+                                Integral
+                                <input id="depthI" class="form-range align-middle" type="range" min="0" max="10" step="0.1" value="1" name="depthI" >
+<!--                                <output class="bubble"></output>-->
+                            </label>
+                            <span class="d-inline-block  limit-right">10</span>
+                            <input id="depthI_number" class="form-control form-text range-number" type="number" min="0" max="10" step="0.1" value="1">
+                        </div>
+                        <div class="form-group form-group-range">
+                            <span class="d-inline-block limit-left">10000</span>
+                            <label for="depthD" class="form-label range-wrap">
+                                Derivative
+                                <input id="depthD" class="form-range align-middle" type="range" min="10000" max="50000" step="0.1" value="10000" name="depthD" >
+<!--                                <output class="bubble"></output>-->
+                            </label>
+                            <span class="d-inline-block  limit-right">50000</span>
+                            <input id="depthD_number" class="form-control form-text range-number" type="number" min="10000" max="50000" step="0.1" value="10000">
+                        </div>
+                        
+                        <h3>Pitch</h3>
+                        <div class="form-group form-group-range">
+                            <span class="d-inline-block limit-left">0</span>
+                            <label for="pitchP" class="form-label range-wrap">
+                                Proportional
+                                <input id="pitchP" class="form-range align-middle" type="range" min="0" max="10" step="0.1" value="0" name="pitchP" >
+<!--                                <output class="bubble"></output>-->
+                            </label>
+                            <span class="d-inline-block  limit-right">10</span>
+                            <input id="pitchP_number" class="form-control form-text range-number" type="number" min="0" max="10" step="0.1" value="0">
+                        </div>
+                        <div class="form-group form-group-range">
+                            <span class="d-inline-block limit-left">0</span>
+                            <label for="pitchI" class="form-label range-wrap">
+                                Integral
+                                <input id="pitchI" class="form-range align-middle" type="range" min="0" max="2.005" step="0.005" value="0" name="pitchI" >
+<!--                                <output class="bubble"></output>-->
+                            </label>
+                            <span class="d-inline-block  limit-right">2.005</span>
+                            <input id="pitchI_number" class="form-control form-text range-number" type="number" min="0" max="2.005" step="0.005" value="0">
+                        </div>
+                        <div class="form-group form-group-range">
+                            <span class="d-inline-block limit-left">0</span>
+                            <label for="pitchD" class="form-label range-wrap">
+                                Derivative
+                                <input id="pitchD" class="form-range align-middle" type="range" min="0" max="5" step="0.1" value="0" name="pitchD" >
+<!--                                <output class="bubble"></output>-->
+                            </label>
+                            <span class="d-inline-block  limit-right">5</span>
+                            <input id="pitchD_number" class="form-control form-text range-number" type="number" min="0" max="5" step="0.1" value="0">
+                        </div>
+                        
+                        <button class="btn btn-primary" type="submit">Сохранить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" href="/js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript" href="/js/libs/jQuery.js"></script>
+<script type="text/javascript" href="/js/bubble.js"></script>
+<script type="text/javascript" href="/js/libs/eventemitter2.min.js"></script>
+<script type="text/javascript" href="/js/libs/roslib.min.js"></script>
+<script type="text/javascript" href="/js/ros.js"></script>
+<script type="text/javascript" href="/js/parameter_server.js"></script>
+</body>
+
+</html>

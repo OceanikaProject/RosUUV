@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" >
+    <link rel="stylesheet" type="text/css" href="/css/ros.css" >
+    <title>Title</title>
+</head>
+<body>
+
+    <img src="" class="p-1 bg-dark" alt="" id="video" />
+
+    <hr/>
+    
+    <div id="imu" ></div>
+
+    <hr/>
+
+    <div class="box">
+
+        <div class="accordion" id="settingsAccordion">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="oceanicHeading">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#oceanicCollapse" aria-expanded="true" aria-controls="oceanicCollapse">
+                        oceanic.ini
+                    </button>
+                </h2>
+                <div id="oceanicCollapse" class="accordion-collapse collapse" aria-labelledby="oceanicHeading" data-bs-parent="#settingsAccordion">
+                    <div class="accordion-body">
+                        <form method="post" id="oceanic_form">
+
+                            <div class="form-group form-group-range">
+                                <span class="d-inline-block limit-left">0</span>
+                                <label for="coef_front_back" class="form-label range-wrap">
+                                    coef_front_back
+                                    <input id="coef_front_back" class="form-range align-middle" type="range" min="0" max="1" step="0.01" value="1" name="hand" >
+        <!--                            <output class="bubble"></output>-->
+                                </label>
+                                <span class="d-inline-block limit-right">1</span>
+                                <input id="coef_front_back_number" class="form-control form-text range-number" type="number" min="0" max="1" step="0.01" value="1">
+                            </div>
+                            <div class="form-group form-group-range">
+                                <span class="d-inline-block limit-left">0</span>
+                                <label for="pitch_resist_coef" class="form-label range-wrap">
+                                    pitch_resist_coef
+                                    <input id="pitch_resist_coef" class="form-range align-middle" type="range" min="0" max="50" step="1" value="50" name="pitch_resist_coef" >
+        <!--                            <output class="bubble"></output>-->
+                                </label>
+                                <span class="d-inline-block limit-right">50</span>
+                                <input id="pitch_resist_coef_number" class="form-control form-text range-number" type="number" min="0" max="50" step="1" value="50">
+                            </div>
+                            <div class="form-group form-group-range">
+                                <span class="d-inline-block limit-left">0</span>
+                                <label for="up_down_power_coef" class="form-label range-wrap">
+                                    up_down_power_coef
+                                    <input id="up_down_power_coef" class="form-range align-middle" type="range" min="0" max="1" step="0.01" value="1" name="up_down_power_coef" >
+        <!--                            <output class="bubble"></output>-->
+                                </label>
+                                <span class="d-inline-block limit-right">1</span>
+                                <input id="up_down_power_coef_number" class="form-control form-text range-number" type="number" min="0" max="1" step="0.01" value="1">
+                            </div>
+                            <div class="form-group form-group-range">
+                                <span class="d-inline-block limit-left">0</span>
+                                <label for="coef_forward" class="form-label range-wrap">
+                                    coef_forward
+                                    <input id="coef_forward" class="form-range align-middle" type="range" min="0" max="1" step="0.01" value="1" name="coef_forward" >
+    <!--                                <output class="bubble"></output>-->
+                                </label>
+                                <span class="d-inline-block limit-right">1</span>
+                                <input id="coef_forward_number" class="form-control form-text range-number" type="number" min="0" max="1" step="0.01" value="1">
+                            </div>
+                            <div class="form-group form-group-range">
+                                <span class="d-inline-block limit-left">0</span>
+                                <label for="coef_up" class="form-label range-wrap">
+                                    coef_up
+                                    <input id="coef_up" class="form-range align-middle" type="range" min="0" max="1" step="0.01" value="1" name="coef_up" >
+        <!--                            <output class="bubble"></output>-->
+                                </label>
+                                <span class="d-inline-block limit-right">1</span>
+                                <input id="coef_up_number" class="form-control form-text range-number" type="number" min="0" max="1" step="0.01" value="1">
+                            </div>
+                            <div class="form-group form-group-range">
+                                <span class="d-inline-block limit-left">0</span>
+                                <label for="coef_turn" class="form-label range-wrap">
+                                    coef_turn
+                                    <input id="coef_turn" class="form-range align-middle" type="range" min="0.00" max="1.00" step="0.01" value="1.00" name="coef_turn" >
+    <!--                                <output class="bubble"></output>-->
+                                </label>
+                                <span class="d-inline-block limit-right">1</span>
+                                <input id="coef_turn_number" class="form-control form-text range-number" type="number" min="0.00" max="1.00" step="0.01" value="1.00">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="vertical_left_reversed" class="form-check-label ml-4">
+                                    <input id="vertical_left_reversed" class="form-check-input" type="checkbox" name="vertical_left_reversed" value="true" />
+                                    <input id="vertical_left_reversed_hidden" class="form-check-input" type="checkbox" name="vertical_left_reversed" value="false" />
+                                    vertical_left_reversed
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="vertical_right_reversed" class="form-check-label ml-4">
+                                    <input id="vertical_right_reversed" class="form-check-input" type="checkbox" name="vertical_right_reversed" value="true" />
+                                    <input id="vertical_right_reversed_hidden" class="form-check-input" type="checkbox" name="vertical_right_reversed" value="false" />
+                                    vertical_right_reversed
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="horizontal_left_reversed" class="form-check-label ml-4">
+                                    <input id="horizontal_left_reversed" class="form-check-input" type="checkbox" name="horizontal_left_reversed" value="true" />
+                                    <input id="horizontal_left_reversed_hidden" class="form-check-input" type="checkbox" name="horizontal_left_reversed" value="false" />
+                                    horizontal_left_reversed
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="horizontal_right_reversed" class="form-check-label ml-4">
+                                    <input id="horizontal_right_reversed" class="form-check-input" type="checkbox" name="horizontal_right_reversed" value="true" />
+                                    <input id="horizontal_right_reversed_hidden" class="form-check-input" type="checkbox" name="horizontal_right_reversed" value="false" />
+                                    horizontal_right_reversed
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="vertical_back_reversed" class="form-check-label ml-4">
+                                    <input id="vertical_back_reversed" class="form-check-input" type="checkbox" name="vertical_back_reversed" value="true" />
+                                    <input id="vertical_back_reversed_hidden" class="form-check-input" type="checkbox" name="vertical_back_reversed" value="false" />
+                                    vertical_back_reversed
+                                </label>
+                            </div>
+
+                            <button class="btn btn-primary" type="submit">Сохранить</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="pidHeading">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#pidCollapse" aria-expanded="true" aria-controls="pidCollapse">
+                        pid.ini
+                    </button>
+                </h2>
+                <div id="pidCollapse" class="accordion-collapse collapse" aria-labelledby="pidHeading" data-bs-parent="#settingsAccordion">
+                    <div class="accordion-body">
+                        <form method="post" id="pid_form">
+                            <h3>Depth</h3>
+                            <div class="form-group form-group-range">
+                                <span class="d-inline-block limit-left">1000</span>
+                                <label for="depthP" class="form-label range-wrap">
+                                    Proportional
+                                    <input id="depthP" class="form-range align-middle" type="range" min="1000" max="4000" step="0.1" value="1000" name="depthP" >
+    <!--                                <output class="bubble"></output>-->
+                                </label>
+                                <span class="d-inline-block limit-right">4000</span>
+                                <input id="depthP_number" class="form-control form-text range-number" type="number" min="1000" max="4000" step="0.1" value="1000">
+                            </div>
+                            <div class="form-group form-group-range">
+                                <span class="d-inline-block limit-left">0</span>
+                                <label for="depthI" class="form-label range-wrap">
+                                    Integral
+                                    <input id="depthI" class="form-range align-middle" type="range" min="0" max="10" step="0.1" value="1" name="depthI" >
+    <!--                                <output class="bubble"></output>-->
+                                </label>
+                                <span class="d-inline-block  limit-right">10</span>
+                                <input id="depthI_number" class="form-control form-text range-number" type="number" min="0" max="10" step="0.1" value="1">
+                            </div>
+                            <div class="form-group form-group-range">
+                                <span class="d-inline-block limit-left">10000</span>
+                                <label for="depthD" class="form-label range-wrap">
+                                    Derivative
+                                    <input id="depthD" class="form-range align-middle" type="range" min="10000" max="50000" step="0.1" value="10000" name="depthD" >
+    <!--                                <output class="bubble"></output>-->
+                                </label>
+                                <span class="d-inline-block  limit-right">50000</span>
+                                <input id="depthD_number" class="form-control form-text range-number" type="number" min="10000" max="50000" step="0.1" value="10000">
+                            </div>
+                            
+                            <h3>Pitch</h3>
+                            <div class="form-group form-group-range">
+                                <span class="d-inline-block limit-left">0</span>
+                                <label for="pitchP" class="form-label range-wrap">
+                                    Proportional
+                                    <input id="pitchP" class="form-range align-middle" type="range" min="0" max="10" step="0.1" value="0" name="pitchP" >
+    <!--                                <output class="bubble"></output>-->
+                                </label>
+                                <span class="d-inline-block  limit-right">10</span>
+                                <input id="pitchP_number" class="form-control form-text range-number" type="number" min="0" max="10" step="0.1" value="0">
+                            </div>
+                            <div class="form-group form-group-range">
+                                <span class="d-inline-block limit-left">0</span>
+                                <label for="pitchI" class="form-label range-wrap">
+                                    Integral
+                                    <input id="pitchI" class="form-range align-middle" type="range" min="0" max="2.005" step="0.005" value="0" name="pitchI" >
+    <!--                                <output class="bubble"></output>-->
+                                </label>
+                                <span class="d-inline-block  limit-right">2.005</span>
+                                <input id="pitchI_number" class="form-control form-text range-number" type="number" min="0" max="2.005" step="0.005" value="0">
+                            </div>
+                            <div class="form-group form-group-range">
+                                <span class="d-inline-block limit-left">0</span>
+                                <label for="pitchD" class="form-label range-wrap">
+                                    Derivative
+                                    <input id="pitchD" class="form-range align-middle" type="range" min="0" max="5" step="0.1" value="0" name="pitchD" >
+    <!--                                <output class="bubble"></output>-->
+                                </label>
+                                <span class="d-inline-block  limit-right">5</span>
+                                <input id="pitchD_number" class="form-control form-text range-number" type="number" min="0" max="5" step="0.1" value="0">
+                            </div>
+                            
+                            <button class="btn btn-primary" type="submit">Сохранить</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            </div>
+            <div id="joystick-panel" class="rounded">
+                <div class="buttonA-position">
+                    <button id="buttonA" class="btn btn-primary rounded-circle">A</button>
+                </div>
+                <div class="buttonB-position">
+                    <button id="buttonB" class="btn btn-primary rounded-circle">B</button>
+                </div>
+                <div class="buttonC-position">
+                    <button id="buttonC" class="btn btn-primary rounded-circle">C</button>
+                </div>
+                <div class="buttonD-position">
+                    <button id="buttonD" class="btn btn-primary rounded-circle">D</button>
+                </div>
+                <div class="buttonLsw-position">
+                    <button id="buttonLsw" class="btn btn-primary rounded-circle">Lsw</button>
+                </div>
+                <div class="buttonRsw-position">
+                    <button id="buttonRsw" class="btn btn-primary rounded-circle">Rsw</button>
+                </div>
+                <div class="buttonHold-position">
+                    <button id="buttonHold" class="btn btn-primary rounded-circle">H</button>
+                </div>
+                <div class="buttonLed-position">
+                    <button id="buttonLed" class="btn btn-primary rounded-circle">L</button>
+                </div>
+                <div class="buttonLeft-position">
+                    <button id="buttonLeft" class="btn btn-primary rounded-circle">Left</button>
+                </div>
+                <div class="buttonRight-position">
+                    <button id="buttonRight" class="btn btn-primary rounded-circle">Right</button>
+                </div>
+
+
+                <div class="left-joystick-position">
+                    <div id="left_joystick" ></div>
+                </div>
+                <div class="right-joystick-position">
+                    <div id="right_joystick"></div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript" src="/js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript" src="/js/libs/jQuery.js"></script>
+<script type="text/javascript" src="/js/bubble.js"></script>
+<script type="text/javascript" src="/js//libs/eventemitter2.min.js"></script>
+<script type="text/javascript" src="/js/libs/roslib.min.js"></script>
+
+<script type="text/javascript" src="/js/ros.js"></script>
+<script type="text/javascript" src="/js/parameter_server.js"></script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.7.3/nipplejs.js"></script>
+<script type="text/javascript" src="http://static.robotwebtools.org/threejs/current/three.min.js"></script>
+<script type="text/javascript" src="http://static.robotwebtools.org/ros3djs/current/ros3d.min.js"></script>
+<script type="text/javascript">
+
+    
+    map = function (x, in_min, in_max, out_min, out_max) {
+        return Math.floor((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
+    }
+
+    var data = [];
+
+    joystick_msg = {
+        ly: 511,
+        lx: 511,
+        ry: 511,
+        rx: 511,
+        State: 0b00011011,
+        SpeedMode: 0,
+        LightMode: 0,
+        pressed_buttons: 0b000000000000000000,
+        Short: {
+            A: 0,
+            B: 0,
+            C: 0,
+            D: 0,
+            Lsw: 0,
+            Rsw: 0,
+            HOLD: 0,
+            LED: 0,
+            L: 0,
+            R: 0
+        },
+        Long: {
+            A: 0,
+            B: 0,
+            C: 0,
+            D: 0,
+            Lsw: 0,
+            Rsw: 0,
+            HOLD: 0,
+            LED: 0,
+            L: 0,
+            R: 0
+        }
+    };
+
+
+    var ros = new ROSLIB.Ros({
+        url :`'ws://${ros_ip_address}:9090`
+    });
+
+
+    var publisher = new ROSLIB.Topic({
+        ros : ros,
+        name : "/web_joystick",
+        messageType : 'std_msgs/String'
+    });
+
+    var joystick_publisher = new ROSLIB.Topic({
+        ros : ros,
+        name : "/esp",
+        messageType : "drone/Joystick"
+    })
+ 
+
+    createLeftJoystick = function () {
+      var options = {
+        zone: document.getElementById('left_joystick'),
+        threshold: 0.1,
+        position: { left: '%' },
+        mode: 'static',
+        size: 100,
+        color: '#000000',
+      };
+
+      manager = nipplejs.create(options);
+
+      var lx = 511;
+      var ly = 511;
+
+      self.manager.on('start', function (event, nipple) {
+
+      });
+
+      self.manager.on('move', function (event, nipple) {
+        lx = Math.cos(nipple.angle.radian) * nipple.distance;
+        ly = Math.sin(nipple.angle.radian) * nipple.distance;
+        lx = map(lx, -50, 50, 0, 1023);
+        ly = map(ly, -50, 50, 0, 1023);
+      });
+
+      self.manager.on('end', function () {   
+        lx = 511;
+        ly = 511;
+      });
+
+      timer = setInterval(() => {
+        joystick_msg.ly = ly;
+        joystick_msg.lx = lx;
+      }, 10);
+      
+    }
+    createRightJoystick = function () {
+      var options = {
+        zone: document.getElementById('right_joystick'),
+        threshold: 0.1,
+        position: { left: '%' },
+        mode: 'static',
+        size: 100,
+        color: '#000000',
+      };
+
+      manager = nipplejs.create(options);
+
+      rx = 511;
+      ry = 511;
+
+      self.manager.on('start', function (event, nipple) {
+
+      });
+
+      self.manager.on('move', function (event, nipple) {
+        rx = Math.cos(nipple.angle.radian) * nipple.distance;
+        ry = Math.sin(nipple.angle.radian) * nipple.distance;
+        rx = map(rx, -50, 50, 0, 1023);
+        ry = map(ry, -50, 50, 0, 1023);
+      });
+
+      self.manager.on('end', function () {
+        rx = 511;
+        ry = 511;
+      });
+
+      timer = setInterval(() => {
+        joystick_msg.ry = ry;
+        joystick_msg.rx = rx;
+      }, 10);
+      
+    }
+    window.onload = function () {
+      createLeftJoystick();
+      createRightJoystick();
+    }
+    var video = document.getElementById('video');
+
+    video.src = `http://${ros_ip_address}:8081/stream?topic=raspicam_node/image`
+
+    var buttonA = document.getElementById('buttonA');
+    var buttonB = document.getElementById('buttonB');
+    var buttonC = document.getElementById('buttonC');
+    var buttonD = document.getElementById('buttonD');
+    var buttonLsw = document.getElementById('buttonLsw');
+    var buttonRsw = document.getElementById('buttonRsw')
+    var buttonHold = document.getElementById('buttonHold');
+    var buttonLed = document.getElementById('buttonLed');
+    var buttonLeft = document.getElementById('buttonLeft');
+    var buttonRight = document.getElementById('buttonRight');
+
+
+    var buttonATimer;
+    var buttonBTimer;
+    var buttonCTimer;
+    var buttonDTimer;
+    var buttonLswTimer;
+    var buttonRswTimer;
+    var buttonHoldTimer;
+    var buttonLedTimer;
+    var buttonLeftTimer;
+    var buttonRightTimer;
+
+    var startA, endA;
+    var startB, endB;
+    var startC, endC;
+    var startD, endD;
+    var startLsw, endLsw;
+    var startRsw, endRsw;
+    var startHold, endHold;
+    var startLed, endLed;
+    var startLeft, endLeft;
+    var startRight, endRight;
+
+
+
+    buttonA.onmousedown = function() {
+        startA = Date.now();
+        buttonATimer = setInterval(() => {
+            joystick_msg.pressed_buttons |= 0b0000001000000000;
+        }, 100);
+    };
+    buttonA.onmouseup = function() {
+        endA = Date.now();
+        if (endA - startA > 200) {
+            joystick_msg.Long.A += 1
+        } else {
+            joystick_msg.Short.A += 1;
+        }
+        joystick_msg.pressed_buttons &= 0b1111110111111111;
+        clearInterval(buttonATimer);
+    };
+
+
+
+    buttonB.onmousedown = function() {
+        startB = Date.now();
+        buttonBTimer = setInterval(() => {
+            joystick_msg.pressed_buttons |= 0b0000000100000000;
+        }, 100);
+    };
+    buttonB.onmouseup = function() {
+        endB = Date.now();
+        if (endB - startB > 200) {
+            joystick_msg.Long.B += 1;
+        } else {
+            joystick_msg.Short.B += 1;
+            joystick_msg.State ^= 0b00000001;
+        }
+        joystick_msg.pressed_buttons &= 0b1111111011111111;
+        clearInterval(buttonBTimer);
+    };
+
+
+
+    buttonC.onmousedown = function() {
+        startC = Date.now();
+        buttonCTimer = setInterval(() => {
+            joystick_msg.pressed_buttons |= 0b0000000010000000;
+        }, 100);
+    };
+    buttonC.onmouseup = function() {
+        endC = Date.now();
+        if (endC - startC > 200) {
+            joystick_msg.Long.C += 1
+        } else {
+            joystick_msg.Short.C += 1;
+            joystick_msg.SpeedMode += 1;
+            if (joystick_msg.SpeedMode > 2) {
+                joystick_msg.SpeedMode = 0;  
+            }
+        }
+        joystick_msg.pressed_buttons &= 0b1111111101111111;
+        clearInterval(buttonCTimer);
+    };
+
+
+
+    buttonD.onmousedown = function() {
+        startD = Date.now();
+        buttonDTimer = setInterval(() => {
+            joystick_msg.pressed_buttons |= 0b0000000001000000;
+        }, 100);
+    };
+    buttonD.onmouseup = function() {
+        endD = Date.now();
+        if (endD - startD > 200) {
+            joystick_msg.Long.D += 1
+        } else {
+            joystick_msg.Short.D += 1;   
+        }
+        joystick_msg.pressed_buttons &= 0b1111111110111111;
+        clearInterval(buttonDTimer);
+    };
+
+
+
+    buttonLsw.onmousedown = function() {
+        startLsw = Date.now();
+        buttonLswTimer = setInterval(() => {
+            joystick_msg.pressed_buttons |= 0b0000000000100000;
+        }, 100);var startA, endA;
+    };
+    buttonLsw.onmouseup = function() {
+        endLsw = Date.now();
+        if (endLsw - startLsw > 200) {
+            joystick_msg.Long.Lsw += 1;
+        } else {
+            joystick_msg.Short.Lsw += 1;   
+            joystick_msg.State ^= (0b00000001 << 4);
+        }
+        joystick_msg.pressed_buttons &= 0b1111111111011111;
+        clearInterval(buttonLswTimer);
+    };
+
+
+
+    buttonRsw.onmousedown = function() {
+        startRsw = Date.now();
+        buttonRswTimer = setInterval(() => {
+            joystick_msg.pressed_buttons |= 0b0000000000010000;
+        }, 100);
+    };
+    buttonRsw.onmouseup = function() {
+        endRsw = Date.now();
+        if (endRsw - startRsw > 200) {
+            joystick_msg.Long.Rsw += 1;
+        } else {
+            joystick_msg.Short.Rsw += 1;   
+            joystick_msg.State ^= (0b00000001 << 3);
+        }
+        joystick_msg.pressed_buttons &= 0b1111111111101111;
+        clearInterval(buttonRswTimer);
+    };
+
+
+
+    buttonHold.onmousedown = function() {
+        startHold = Date.now();
+        buttonHoldTimer = setInterval(() => {
+            joystick_msg.pressed_buttons |= 0b0000000000001000;
+        }, 100);
+    };
+    buttonHold.onmouseup = function() {
+        endHold = Date.now();
+        if (endHold - startHold > 200) {
+            joystick_msg.Long.HOLD += 1;
+        } else {
+            joystick_msg.Short.HOLD += 1;   
+            joystick_msg.State ^= (0b00000001 << 1);
+        }
+        joystick_msg.pressed_buttons &= 0b1111111111110111;
+        clearInterval(buttonHoldTimer);
+    };
+
+
+
+    buttonLed.onmousedown = function() {
+        startLed = Date.now();
+        buttonLedTimer = setInterval(() => {
+            joystick_msg.pressed_buttons |= 0b0000000000000100;
+        }, 100);
+    };
+    buttonLed.onmouseup = function() {
+        endLed = Date.now();
+        if (endLed - startLed > 200) {
+            joystick_msg.Long.LED += 1
+        } else {
+            joystick_msg.Short.LED += 1;  
+            joystick_msg.LightMode += 1;
+            if (joystick_msg.LightMode > 3) {
+                joystick_msg.LightMode = 0;   
+            } 
+        }
+        joystick_msg.pressed_buttons &= 0b1111111111111011;
+        clearInterval(buttonLedTimer);
+    };
+
+
+
+    buttonLeft.onmousedown = function() {
+        startLeft = Date.now();
+        buttonLeftTimer = setInterval(() => {
+            joystick_msg.pressed_buttons |= 0b0000000000000010;
+        }, 100);
+    };
+    buttonLeft.onmouseup = function() {
+        endLeft = Date.now();
+        if (endLeft - startLeft > 200) {
+            joystick_msg.Long.L += 1
+        } else {
+            joystick_msg.Short.L += 1;   
+        }
+        joystick_msg.pressed_buttons &= 0b1111111111111101;
+        clearInterval(buttonLeftTimer);
+    };
+
+
+
+    buttonRight.onmousedown = function() {
+        startRight = Date.now();
+        buttonRightTimer = setInterval(() => {
+            joystick_msg.pressed_buttons |= 0b0000000000000001;
+        }, 100);
+    };
+    buttonRight.onmouseup = function() {
+        endRight = Date.now();
+        if (endRight - startRight > 200) {
+            joystick_msg.Long.R += 1
+        } else {
+            joystick_msg.Short.R += 1;   
+        }
+        joystick_msg.pressed_buttons &= 0b1111111111111110;
+        clearInterval(buttonRightTimer);
+    };
+
+
+
+
+    t = setInterval(() => {
+        // console.log(data);
+        console.log(joystick_msg);
+        var msg = new ROSLIB.Message({
+            data : "Hello from roslibjs"
+        })
+        var m = new ROSLIB.Message({
+            left_y: joystick_msg.ly,
+            left_x: joystick_msg.lx,
+            right_y: joystick_msg.ry,
+            right_x: joystick_msg.rx,
+            State: joystick_msg.State,
+            SpeedMode: joystick_msg.SpeedMode,
+            LightMode: joystick_msg.LightMode,
+            pressed_buttons: joystick_msg.pressed_buttons
+        })
+        publisher.publish(msg);
+        joystick_publisher.publish(m);
+    }, 100);
+    
+</script>
+</body>
+
+</html>
