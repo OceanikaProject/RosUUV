@@ -2,13 +2,16 @@
 
     <rosparam command="load" file="$(find drone)/config/pid.yaml" />
     <rosparam command="load" file="$(find drone)/config/oceanic.yaml" />
-    <!-- <include file="$(find raspicam_node)/launch/camerav2_320x240_30fps.launch">
+    <rosparam command="load" file="$(find drone)/config/calibration.yaml"/>
+    <!--<include file="$(find raspicam_node)/launch/camerav2_320x240_30fps.launch">
         <arg name="enable_raw" value="true" />
     </include> -->
      <node pkg="drone" type="joystick_driver" name="joystick_driver"></node>
-     <node pkg="drone" type="navigation" name="talker_node"/>
+     <node pkg="drone" type="navigation" name="talker_node">
+        <param name="CALIBRATED" value="true"/>
+     </node>
    
-   <!--  <node pkg="drone" type="control.py" name="control" output="screen"></node> -->
+    <node pkg="drone" type="control.py" name="control" output="screen"></node>
    <!-- <node pkg="drone" type="hand.py" name="hand" output="screen"/>
 
     <include file="$(find drone_description)/launch/viz.launch" />-->

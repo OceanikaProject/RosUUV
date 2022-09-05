@@ -1,13 +1,15 @@
 <launch>
 
-    <!-- <rosparam command="load" file="$(find drone)/config/pid.yaml" /> -->
-    <!-- <rosparam command="load" file="$(find drone)/config/oceanic.yaml" /> -->
-     <!-- <node pkg="drone" type="joystick_driver" name="joystick_driver"></node> -->
-     <node pkg="drone" type="navigation" name="talker_node">
+    <rosparam command="load" file="$(find drone)/config/pid.yaml" />
+    <rosparam command="load" file="$(find drone)/config/oceanic.yaml" />
+    <rosparam command="load" file="$(find drone)/config/calibration.yaml"/>
+     <node pkg="drone" type="joystick_driver" name="joystick_driver"></node>
+     <node pkg="drone" type="navigation" name="talker_node" output="screen">
         <param name="DEBUG" value="true"/>
+        <param name="CALIBRATED" value="true"/>
      </node>
    
-    <!-- <node pkg="drone" type="control.py" name="control" output="screen"></node> -->
-    <!-- <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" /> -->
+    <node pkg="drone" type="control.py" name="control" output="screen"></node>
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
     
 </launch>

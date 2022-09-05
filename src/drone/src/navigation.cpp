@@ -19,7 +19,7 @@ int main(int argc, char **argv)
    {
        // Open port for reading and writing
 
-    //    fprintf(stderr, "Failed to open i2c bus %s\n", I2C_BUS);
+       fprintf(stderr, "Failed to open i2c bus %s\n", I2C_BUS);
 
        exit(1);
    }
@@ -29,9 +29,10 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "talker");
     ros::NodeHandle n;
     ros::Publisher pub = n.advertise<geometry_msgs::PoseStamped>("talker_topic", 1000);
-    ros::Rate loop_rate(10);
+    ros::Rate loop_rate(100);
 
     const bool DEBUG = n.hasParam("/talker_node/DEBUG");
+    const bool CALIBRATED = n.hasParam("/talker_node/CALIBRATED");
     
 
     static ros::Publisher acceleration_pub;
@@ -62,6 +63,8 @@ int main(int argc, char **argv)
     float ax, ay, az;
     float gx, gy, gz;
     float mx, my, mz;
+    float axoffset, ayoffset, azoffset, gxoffset, gyoffset, gzoffset;
+    float mxoffset, myoffset, mzoffset, mxscale, myscale, mzscale;
 
     while (ros::ok())
     {
@@ -77,17 +80,38 @@ int main(int argc, char **argv)
         imu.Gyroscope::getX(gx, gy, gz);
         compass.getX(mx, my, mz);
 
-        // cout << ax << " " << ay << " " << az << " " << gx << " " << gy << " " << gz << endl;
-        // cout << bar.getP() << " | " << bar.getT() << endl;
+        ax = -ax; ay = -ay; az = -az;
+        gx = -gx; gy = -gy; gz = -gz;
+        mx = -mx; my = -my; mz = -mz;
 
-        // bar.getDepth();
+        if (CALIBRATED)
+        {
+            n.getParam("/Accelerometer/axoffset", axoffset);
+            n.getParam("/Accelerometer/ayoffset", ayoffset);
+            n.getParam("/Accelerometer/azoffset", azoffset);
+            n.getParam("/Gyroscope/gxoffset", gxoffset);
+            n.getParam("/Gyroscope/gyoffset", gyoffset);
+            n.getParam("/Gyroscope/gzoffset", gzoffset);
+            n.getParam("/Magnetometer/mxoffset", mxoffset);
+            n.getParam("/Magnetometer/myoffset", myoffset);
+            n.getParam("/Magnetometer/mzoffset", mzoffset);
+            n.getParam("/Magnetometer/mxscale", mxscale);
+            n.getParam("/Magnetometer/myscale", myscale);
+            n.getParam("/Magnetometer/mzscale", mzscale);
+            // std::cout << axoffset << " " << ayoffset << " " << azoffset << std::endl;
+            ax = ax - axoffset;
+            ay = ay - ayoffset;
+            az = az - azoffset;
+            gx = gx - gxoffset;
+            gy = gy - gyoffset;
+            gz = gz - gzoffset;
+            mx = (mx - mxoffset) * mxscale;
+            my = (my - myoffset) * myscale;
+            mz = (mz - mzoffset) * mzscale;
+        }
 
-        ahrs.update(gx, gy, gz, ax, ay, az, mx, my, mz);
 
-        // geometry_msgs::Vector3 msg;
-        // msg.x = 1;
-        // msg.y = 2;
-        // msg.z = 3;
+        ahrs.update(gx, gy, gz, ax, ay, az, -mx, my, mz);
 
         geometry_msgs::PoseStamped msg;
 

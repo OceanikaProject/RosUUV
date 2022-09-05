@@ -186,27 +186,27 @@ class Control:
 
         self.serial_frame["data"][5] = light_mode
 
-        #roll, pitch, yaw = euler_from_quaternion([
-        #    navigation_msg.pose.orientation.x,
-        #    navigation_msg.pose.orientation.y,
-        #    navigation_msg.pose.orientation.z,
-        #    navigation_msg.pose.orientation.w
-        #])
+        pitch, roll, yaw = euler_from_quaternion([
+           navigation_msg.pose.orientation.x,
+           navigation_msg.pose.orientation.y,
+           navigation_msg.pose.orientation.z,
+           navigation_msg.pose.orientation.w
+        ])
 
-        #roll = roll * 57.2958
-        #pitch = pitch * 57.2958
-        #yaw = yaw * 57.2958
+        roll = roll * 57.2958
+        pitch = pitch * 57.2958
+        yaw = yaw * 57.2958
 
         q0 = navigation_msg.pose.orientation.w
         q1 = navigation_msg.pose.orientation.x
         q2 = navigation_msg.pose.orientation.y
         q3 = navigation_msg.pose.orientation.z
 
-        pitch = atan2(2*q2*q3 - 2*q0*q1, 2*q0*q0 + 2*q3*q3 - 1)
-        roll = -asin(2*q1*q3 + 2*q0*q2)
-        yaw = atan2(2*q1*q2 - 2*q0*q3, 2*q0*q0 + 2*q1*q1 - 1)
+        # pitch = atan2(2*q2*q3 - 2*q0*q1, 2*q0*q0 + 2*q3*q3 - 1)
+        # roll = -asin(2*q1*q3 + 2*q0*q2)
+        # yaw = atan2(2*q1*q2 - 2*q0*q3, 2*q0*q0 + 2*q1*q1 - 1)
 
-        pitch *= 57.2958
+        # pitch *= 57.2958
         print(roll, pitch, yaw)
 
         dt = rospy.Time.now() - self.t

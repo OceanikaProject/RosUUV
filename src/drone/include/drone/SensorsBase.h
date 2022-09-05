@@ -14,7 +14,7 @@ class Sensor
 
         virtual void startup() {}
         virtual void get_raw_data() {}
-        virtual void calibrate() {}
+        virtual void calibrate(int) {}
 
     protected:
 
@@ -193,7 +193,7 @@ class Gyroscope: public Sensor3Axis
                 get_raw_data();
                 get_sample();
 
-                std::cout << "gx = " << gx << " gy = " << gy << " gz = " << gz << endl;
+                std::cout << "gx = " << gx << " gy = " << gy << " gz = " << gz << std::endl;
 
                 gxsum += gx;
                 gysum += gy;

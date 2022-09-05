@@ -84,6 +84,64 @@ void MPU6050::get_raw_data()
     Gyroscope::setX(x, y, z);
 }
 
+void MPU6050::calibration(int rounds)
+{
+    float x, y, z;
+
+    usleep(4000000);
+
+    float axsum = 0.0f, aysum = 0.0f, azsum = 0.0f;
+    float axoffset = 0.0f, ayoffset = 0.0f, azoffset = 0.0f;
+
+    std::cout << "Keep accelerometer according to ax = 0 ay = 0 az = 1" << std::endl;
+
+    for (int i; i < rounds; i++)
+    {
+        MPU6050::get_raw_data();
+        Accelerometer::get_sample();
+        Accelerometer::getX(x, y, z);
+
+        std::cout << "ax = " << x << " ay = " << y << " az = " << z << std::endl;
+
+        axsum += x;
+        aysum += y;
+        azsum += z;
+        usleep(50000);
+    }
+    axoffset = axsum / rounds;
+    ayoffset = aysum / rounds;
+    azoffset = azsum / rounds - 1;
+
+    std::cout << "axoffset = " << axoffset << " ayoffset = " << ayoffset << " azoffset = " << azoffset << std::endl;
+
+    usleep(4000000);
+
+    float gxsum = 0.0f, gysum = 0.0f, gzsum = 0.0f;
+    float gxoffset = 0.0f, gyoffset = 0.0f, gzoffset = 0.0f;
+
+    std::cout << "Keep gyroscope steady" << std::endl;
+
+    for (int i; i < rounds; i++)
+    {
+        MPU6050::get_raw_data();
+        Gyroscope::get_sample();
+        Gyroscope::getX(x, y, z);
+
+        std::cout << "gx = " << x << " gy = " << y << " gz = " << z << std::endl;
+
+        gxsum += x;
+        gysum += y;
+        gzsum += z;
+        usleep(50000);
+    }
+    gxoffset = gxsum / rounds;
+    gyoffset = gysum / rounds;
+    gzoffset = gzsum / rounds;
+
+    std::cout << "axoffset = " << axoffset << " ayoffset = " << ayoffset << " azoffset = " << azoffset << std::endl;
+        
+}
+
 
 QMC5883::QMC5883() : Magnetometer::Magnetometer()
 {

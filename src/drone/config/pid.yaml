@@ -1,7 +1,7 @@
 PidDepth:
   D: 0.1
   I: 0.01
-  P: 100
+  P: 0
 PidPitch:
   D: 0.0
   I: 0.0

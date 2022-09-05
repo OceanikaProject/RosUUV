@@ -1,0 +1,15 @@
+Accelerometer:
+  axoffset: -0.096923828125
+  ayoffset: -0.020465087890625
+  azoffset: -0.02978515625
+Gyroscope:
+  gxoffset: 2.2290674845377603
+  gyoffset: -0.6305313110351562
+  gzoffset: 0.253143310546875
+Magnetometer:
+  mxoffset: 0.00885009765625
+  mxscale: 0.9454757734967894
+  myoffset: -0.009613037109375
+  myscale: 1.0086252529970419
+  mzoffset: -0.035614013671875
+  mzscale: 1.0516541670724977

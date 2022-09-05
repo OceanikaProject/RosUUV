@@ -74,6 +74,7 @@ class MPU6050 : public Accelerometer, public Gyroscope
             Accelerometer::get_sample();
             Gyroscope::get_sample();
         }
+        void calibration(int rounds);
 };
 
 
