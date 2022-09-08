@@ -38,7 +38,14 @@ class PID:
         self.prev_error = error
         return PID.constrain(self.proportional + self.integral + self.derivative, -100, 100)
 
+    def break_pid(self):
+        self.proportional = 0
+        self.integral = 0
+        self.derivative = 0
+
     def set_target(self, target):
+        if target != self.target:
+            self.break_pid
         self.target = target
 
     def set_gains(self, P, I, D):
@@ -207,7 +214,7 @@ class Control:
         # yaw = atan2(2*q1*q2 - 2*q0*q3, 2*q0*q0 + 2*q1*q1 - 1)
 
         # pitch *= 57.2958
-        print(roll, pitch, yaw)
+        # print(roll, pitch, yaw)
 
         dt = rospy.Time.now() - self.t
 
@@ -228,13 +235,17 @@ class Control:
         pitch_gains = rospy.get_param('PidPitch')
         self.pid_depth.set_gains(depth_gains['P'], depth_gains['I'], depth_gains['D'])
         self.pid_pitch.set_gains(pitch_gains['P'], pitch_gains['I'], pitch_gains['D'])
+        self.pid_depth.set_target(depth_gains['target'])
+        self.pid_pitch.set_target(pitch_gains['target'])
 
         #rospy.loginfo("stabilization_on %s" % str(stabilization_on))
         if stabilization_on:
             if lx in range(-12, 13) and ly in range(-12, 13):
                 pitch_power = self.pid_pitch.control(pitch, dt)
                 depth_power = -self.pid_depth.control(navigation_msg.pose.position.z, dt)
-                rospy.loginfo("depth_power %f | pitch_power %f, pitch %f" , depth_power , pitch_power, pitch)
+                # depth_power = 0
+                # rospy.loginfo("depth_power %f | pitch_power %f, pitch %f" , depth_power , pitch_power, pitch)
+                print(round(pitch, 2), round(pitch_power, 2), round(depth_power, 2))
                 left_alt_pwm = depth_power + pitch_power
                 right_alt_pwm = depth_power + pitch_power
                 back_alt_pwm = depth_power - pitch_power
@@ -252,11 +263,15 @@ class Control:
                 self.serial_frame["data"][4] = back_alt_pwm
 
                 # self.pid_roll.set_target(roll)
-                self.pid_pitch.set_target(pitch)
+                # self.pid_pitch.set_target(0)
                 # self.pid_yaw.set_target(yaw)
-                self.pid_depth.set_target(navigation_msg.pose.position.z)
+                # self.pid_depth.set_target(navigation_msg.pose.position.z)
+                self.pid_pitch.break_pid()
+                self.pid_depth.break_pid()
 
         else:
+            self.pid_pitch.break_pid()
+            self.pid_depth.break_pid()
             left_alt_pwm = ly + lx
             right_alt_pwm = ly + lx
             back_alt_pwm = ly - lx
@@ -271,13 +286,13 @@ class Control:
         self.serial_frame["data"][2] = left_heading_pwm
         self.serial_frame["data"][3] = right_heading_pwm
 
-        self.serial_frame["data"][0] = Control.constrain(int(self.serial_frame["data"][0] * vertical_right_direction * 0.8), 100, -100) # d3  motor3
-        self.serial_frame["data"][1] = Control.constrain(int(self.serial_frame["data"][1] * vertical_left_direction * 0.8), 100, -100) # d5  motor4
+        self.serial_frame["data"][0] = Control.constrain(int(self.serial_frame["data"][0] * vertical_right_direction * 0.84), 100, -100) # d3  motor3
+        self.serial_frame["data"][1] = Control.constrain(int(self.serial_frame["data"][1] * vertical_left_direction * 0.84), 100, -100) # d5  motor4
         self.serial_frame["data"][2] = Control.constrain(int(self.serial_frame["data"][2] * horizontal_right_direction), 100, -100) # d6  motor1
         self.serial_frame["data"][3] = Control.constrain(int(self.serial_frame["data"][3] * horizontal_left_direction), 100, -100) # d9  motor2
         self.serial_frame["data"][4] = Control.constrain(int(self.serial_frame["data"][4] * vertical_back_direction), 100, -100) # d10 motor5
 
-        #print(self.serial_frame["data"])
+        print(self.serial_frame["data"])
 
         self.t = rospy.Time.now()
 
@@ -290,7 +305,7 @@ class Control:
                     self.serial_frame["crc"] = self.serial_frame["crc"] ^ (int(self.serial_frame["data"][i]) & 0b11111111)
                 #print(self.serial_frame["crc"])
                 msg = struct.pack(
-                    "2B8b1B",
+                    "2B5b4B",
                     self.serial_frame["header"],
                     self.serial_frame["len"],
                     self.serial_frame["data"][0],

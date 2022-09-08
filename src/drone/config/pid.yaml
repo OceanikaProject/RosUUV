@@ -1,8 +1,10 @@
 PidDepth:
-  D: 0.1
-  I: 0.01
-  P: 0
+  D: 0
+  I: 4
+  P: 50
+  target: 0
 PidPitch:
-  D: 0.0
-  I: 0.0
-  P: 1
+  D: 0.01
+  I: 0.12
+  P: 0.25
+  target: 0

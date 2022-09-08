@@ -4,7 +4,7 @@ coef_turn: 1
 coef_up: 1
 horizontal_left:
   pin: 9
-  reversed: false
+  reversed: true
 horizontal_right:
   pin: 6
   reversed: false
