@@ -7,6 +7,20 @@
 
 class MPU6050 : public Accelerometer, public Gyroscope
 {
+
+    /*
+        Класс датчика MPU6050
+    */
+
+    // ----------------------------------
+
+    /*
+        Регистры датчика
+                |
+                |
+                |
+                V
+    */
     const char PWR_M = 0x6B;
     const char DIV = 0x19;
     const char CONFIG = 0x1A;
@@ -28,6 +42,14 @@ class MPU6050 : public Accelerometer, public Gyroscope
     const char GYRO_ZOUT_H = 0x47;
     const char GYRO_ZOUT_L = 0x48;
 
+    /*
+        Настройки датчика
+                |
+                |
+                |
+                V
+    */
+
     const char ACCEL_RANGE_2G = 0x00;
     const char ACCEL_RANGE_4G = 0x08;
     const char ACCEL_RANGE_8G = 0x10;
@@ -37,6 +59,8 @@ class MPU6050 : public Accelerometer, public Gyroscope
     const char GYRO_RANGE_500DEG = 0x08;
     const char GYRO_RANGE_1000DEG = 0x10;
     const char GYRO_RANGE_2000DEG = 0x18;
+
+    // ----------------------------------
 
     const char MPU6050_ADDR = 0x68;
 
@@ -66,20 +90,35 @@ class MPU6050 : public Accelerometer, public Gyroscope
 
         MPU6050(int chosen_accelerometer_range, int chosen_gyroscope_range);
 
-        void startup(I2C bus, int fd);
-        char read_status();
-        void get_raw_data();
-        void get_sample()
+        void startup(I2C bus, int fd); // Инициализация 
+        char read_status();            // Чтение статуса 
+        void get_binary_data();           // Чтение сырых битовых данных
+        void get_sample()              // Преобразование битовых данных в реальные величины
         {
             Accelerometer::get_sample();
             Gyroscope::get_sample();
         }
-        void calibration(int rounds);
+        void calibration(int rounds);  // Калибровка
 };
 
 
 class QMC5883 : public Magnetometer
 {
+
+    /*
+        Класс датчика QMC5883
+    */
+
+    // ----------------------------------
+
+    /*
+        Регистры датчика
+                |
+                |
+                |
+                V
+    */
+
     const char XOUT_LSB = 0x00;
     const char XOUT_MSB = 0x01;
     const char YOUT_LSB = 0x02;
@@ -93,6 +132,14 @@ class QMC5883 : public Magnetometer
     const char REG_CONTROL_2 = 0x0A;
     const char REG_PERIOD = 0x0B;
     const char QMC5883_ADDRESS = 0x0D;
+
+    /*
+        Настройки датчика
+                |
+                |
+                |
+                V
+    */
 
     // Oversampling values for the CONFIG register
     const char CONFIG_OS512 = 0b00000000;
@@ -119,6 +166,8 @@ class QMC5883 : public Magnetometer
     const char CONFIG2_ROL_PTR = 0b01000000;
     const char CONFIG2_SOFT_RST = 0b10000000;
 
+    // ----------------------------------
+
     public:
 
         enum MAG_CONVERSION
@@ -135,10 +184,10 @@ class QMC5883 : public Magnetometer
 
         QMC5883(int chosen_oversampling, int chosen_range, int chosen_rate, int chosen_mode);
 
-        void startup(I2C bus, int fd);
-        char read_status();
-        void get_raw_data();
-        void get_sample()
+        void startup(I2C bus, int fd);    // Инициализация
+        char read_status();               // Чтение статуса
+        void get_binary_data();              // Чтение сырых битовых данных
+        void get_sample()                 // Преобразование битовых данных в реальные величины
         {
             Magnetometer::get_sample();
         }
@@ -148,8 +197,32 @@ class QMC5883 : public Magnetometer
 class MS5837_30BA : public Barometer
 {
 
+    /*
+        Класс датчика MS5837_30BA
+    */
+
+    // ----------------------------------
+
+    /*
+        Регистры датчика
+                |
+                |
+                |
+                V
+    */
+
     const char ADC_READ = 0x00;
     const char RESET = 0x1E;
+    const char PROM_READ = 0xA0;
+
+    /*
+        Настройки датчика
+                |
+                |
+                |
+                V
+    */
+
     const char CONVERT_D1_OSR256 = 0x40;
     const char CONVERT_D1_OSR512 = 0x42;
     const char CONVERT_D1_OSR1024 = 0x44;
@@ -162,7 +235,8 @@ class MS5837_30BA : public Barometer
     const char CONVERT_D2_OSR2048 = 0x56;
     const char CONVERT_D2_OSR4096 = 0x58;
     const char CONVERT_D2_OSR8192 = 0x5A;
-    const char PROM_READ = 0xA0;
+    
+    // ----------------------------------
 
     const char MS5837_30BA_ADDRESS = 0x76;
 
@@ -172,12 +246,12 @@ class MS5837_30BA : public Barometer
         int fd;
         double Temperature;
         float conversion;
-        unsigned char _crc4(unsigned int n_prom[]);
+        unsigned char _crc4(unsigned int n_prom[]);     // Проверка контрольной суммы
         void setT(float Temperature)
         {
             this->Temperature = Temperature;
         }
-        void calculate(unsigned long, unsigned long);
+        void calculate(unsigned long, unsigned long);   // Преобразование битовых данных в реальные величины
 
     public:
     
@@ -188,9 +262,9 @@ class MS5837_30BA : public Barometer
 
         MS5837_30BA() : Barometer::Barometer() {}
 
-        bool startup(I2C bus, int fd);
+        bool startup(I2C bus, int fd);                  // Инициализация
         
-        void get_raw_data();
+        void get_binary_data();                            // Чтение сырых битовых данных
 
         void set_conversion(float conversion = Pa)
         {

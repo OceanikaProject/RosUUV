@@ -1,5 +1,4 @@
 #include "drone/sensors.h"
-#include "wiringPiI2C.h"
 
 
 MPU6050::MPU6050() : Accelerometer::Accelerometer(), Gyroscope::Gyroscope()
@@ -65,23 +64,23 @@ void MPU6050::startup(I2C bus, int fd)
     this->bus.i2c_write_register(this->fd, INT_EN, 1);
 }
 
-void MPU6050::get_raw_data()
+void MPU6050::get_binary_data()
 {
     this->bus.selectDevice(this->fd, MPU6050_ADDR, "QMC5883");
 
     float x, y, z;
 
-    x = get_value(bus.i2c_read_register(fd, ACCEL_XOUT_L), bus.i2c_read_register(fd, ACCEL_XOUT_H));
-    y = get_value(bus.i2c_read_register(fd, ACCEL_YOUT_L), bus.i2c_read_register(fd, ACCEL_YOUT_H));
-    z = get_value(bus.i2c_read_register(fd, ACCEL_ZOUT_L), bus.i2c_read_register(fd, ACCEL_ZOUT_H));
+    x = get_16bit_value(bus.i2c_read_register(fd, ACCEL_XOUT_L), bus.i2c_read_register(fd, ACCEL_XOUT_H));
+    y = get_16bit_value(bus.i2c_read_register(fd, ACCEL_YOUT_L), bus.i2c_read_register(fd, ACCEL_YOUT_H));
+    z = get_16bit_value(bus.i2c_read_register(fd, ACCEL_ZOUT_L), bus.i2c_read_register(fd, ACCEL_ZOUT_H));
 
-    Accelerometer::setX(x, y, z);
+    Accelerometer::set_3d_mgnitude(x, y, z);
 
-    x = get_value(bus.i2c_read_register(fd, GYRO_XOUT_L), bus.i2c_read_register(fd, GYRO_XOUT_H));
-    y = get_value(bus.i2c_read_register(fd, GYRO_YOUT_L), bus.i2c_read_register(fd, GYRO_YOUT_H));
-    z = get_value(bus.i2c_read_register(fd, GYRO_ZOUT_L), bus.i2c_read_register(fd, GYRO_ZOUT_H));
+    x = get_16bit_value(bus.i2c_read_register(fd, GYRO_XOUT_L), bus.i2c_read_register(fd, GYRO_XOUT_H));
+    y = get_16bit_value(bus.i2c_read_register(fd, GYRO_YOUT_L), bus.i2c_read_register(fd, GYRO_YOUT_H));
+    z = get_16bit_value(bus.i2c_read_register(fd, GYRO_ZOUT_L), bus.i2c_read_register(fd, GYRO_ZOUT_H));
 
-    Gyroscope::setX(x, y, z);
+    Gyroscope::set_3d_mgnitude(x, y, z);
 }
 
 void MPU6050::calibration(int rounds)
@@ -97,9 +96,9 @@ void MPU6050::calibration(int rounds)
 
     for (int i; i < rounds; i++)
     {
-        MPU6050::get_raw_data();
+        MPU6050::get_binary_data();
         Accelerometer::get_sample();
-        Accelerometer::getX(x, y, z);
+        Accelerometer::get_3d_magnitude(x, y, z);
 
         std::cout << "ax = " << x << " ay = " << y << " az = " << z << std::endl;
 
@@ -123,9 +122,9 @@ void MPU6050::calibration(int rounds)
 
     for (int i; i < rounds; i++)
     {
-        MPU6050::get_raw_data();
+        MPU6050::get_binary_data();
         Gyroscope::get_sample();
-        Gyroscope::getX(x, y, z);
+        Gyroscope::get_3d_magnitude(x, y, z);
 
         std::cout << "gx = " << x << " gy = " << y << " gz = " << z << std::endl;
 
@@ -235,17 +234,17 @@ char QMC5883::read_status()
 }
 
 
-void QMC5883::get_raw_data()
+void QMC5883::get_binary_data()
 {
     this->bus.selectDevice(this->fd, QMC5883_ADDRESS, "QMC5883");
 
     float x, y, z;
 
-    x = get_value(bus.i2c_read_register(fd, XOUT_LSB), bus.i2c_read_register(fd, XOUT_MSB));
-    y = get_value(bus.i2c_read_register(fd, YOUT_LSB), bus.i2c_read_register(fd, YOUT_MSB));
-    z = get_value(bus.i2c_read_register(fd, ZOUT_LSB), bus.i2c_read_register(fd, ZOUT_MSB));
+    x = get_16bit_value(bus.i2c_read_register(fd, XOUT_LSB), bus.i2c_read_register(fd, XOUT_MSB));
+    y = get_16bit_value(bus.i2c_read_register(fd, YOUT_LSB), bus.i2c_read_register(fd, YOUT_MSB));
+    z = get_16bit_value(bus.i2c_read_register(fd, ZOUT_LSB), bus.i2c_read_register(fd, ZOUT_MSB));
 
-    Magnetometer::setX(x, y, z);
+    Magnetometer::set_3d_mgnitude(x, y, z);
 }
 
 
@@ -307,7 +306,7 @@ unsigned char MS5837_30BA::_crc4(unsigned int n_prom[])
 }
 
 
-void MS5837_30BA::get_raw_data()
+void MS5837_30BA::get_binary_data()
 {
 
     this->bus.selectDevice(this->fd, MS5837_30BA_ADDRESS, "Pressure");

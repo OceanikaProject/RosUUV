@@ -1,0 +1,9 @@
+forward:
+  power: 0
+  duration: 0
+up:
+  power: 0
+  duration: 0
+right:
+  power: 0
+  duration: 0

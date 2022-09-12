@@ -10,31 +10,39 @@ using namespace std;
 
 class Sensor
 {
+
+    /*
+        Базовый класс для датчиков
+    */
+
     public:
 
         virtual void startup() {}
-        virtual void get_raw_data() {}
+        virtual void get_binary_data() {}
         virtual void calibrate(int) {}
 
     protected:
 
-        static int get_value(unsigned int low, unsigned int high)
+        static int get_16bit_value(unsigned int low, unsigned int high)
         {
             /*
-            Converting bit value of two 8-bit registers to one
+                Преобразование старшего и младшего байтов в 16-битное число
             */
 
-        int value;
-        long temp;
+            int value;
+            long temp;
 
-        temp = (high << 8) | low;
-        if (temp > 32768) temp -= 65536;
-        value = static_cast <int> (temp);
-        return value;
+            temp = (high << 8) | low;
+            if (temp > 32768) temp -= 65536;
+            value = static_cast <int> (temp);
+            return value;
         }
 
         static float convert(int value, int range)
         {
+            /*
+                Преобразование данных АЦП в единицу счисления величины
+            */
             return value / 32768.0 * range;
         }
 };
@@ -42,21 +50,31 @@ class Sensor
 
 class Sensor3Axis: public Sensor
 {
+
+    /*
+        Базовый класс для трехосевых датчиков
+    */
+
     public:
 
         virtual int get_range() {}
-        virtual void getX(float &x, float &y ,float &z) {}
+        virtual void get_3d_magnitude(float &x, float &y ,float &z) {}
         virtual void get_sample() {}
 
     protected:
 
-        virtual void setX(float x, float y, float z) {}
+        virtual void set_3d_mgnitude(float x, float y, float z) {}
         virtual void set_range(int range) {}       
 };
 
 
 class Accelerometer: public Sensor3Axis
 {
+
+    /*
+        Базовый класс для трехосевых акселерометров
+    */
+
     private:
 
         float ax, ay, az;
@@ -72,7 +90,7 @@ class Accelerometer: public Sensor3Axis
             this->range = 0;
         }
 
-        void getX(float &x, float &y ,float &z)
+        void get_3d_magnitude(float &x, float &y ,float &z)
         {
             x = this->ax;
             y = this->ay;
@@ -93,7 +111,7 @@ class Accelerometer: public Sensor3Axis
 
     protected:
 
-        void setX(float x, float y, float z)
+        void set_3d_mgnitude(float x, float y, float z)
         {
             this->ax = x;
             this->ay = y;
@@ -107,6 +125,13 @@ class Accelerometer: public Sensor3Axis
 
         void calibrate(int rounds)
         {
+
+            /*
+                Калибровка акселерометра.
+                Для калибровки необходимо разместить датчик на поверхности
+                параллельной полу и держать его неподвижным.
+            */
+
             float axsum = 0.0f, aysum = 0.0f, azsum = 0.0f;
             float axoffset = 0.0f, ayoffset = 0.0f, azoffset = 0.0f;
 
@@ -114,7 +139,7 @@ class Accelerometer: public Sensor3Axis
 
             for (int i; i < rounds; i++)
             {
-                get_raw_data();
+                get_binary_data();
                 get_sample();
 
                 std::cout << "ax = " << ax << " ay = " << ay << " az = " << az << endl;
@@ -133,6 +158,11 @@ class Accelerometer: public Sensor3Axis
 
 class Gyroscope: public Sensor3Axis
 {
+
+    /*
+        Базовый класс для трехосевых гироскопов
+    */
+
     private:
 
         float gx, gy, gz;
@@ -140,7 +170,7 @@ class Gyroscope: public Sensor3Axis
 
     public:
 
-        void getX(float &x, float &y ,float &z)
+        void get_3d_magnitude(float &x, float &y ,float &z)
         {
             x = this->gx;
             y = this->gy;
@@ -169,7 +199,7 @@ class Gyroscope: public Sensor3Axis
 
     protected:
 
-        void setX(float x, float y, float z)
+        void set_3d_mgnitude(float x, float y, float z)
         {
             this->gx = x;
             this->gy = y;
@@ -183,6 +213,12 @@ class Gyroscope: public Sensor3Axis
         
         void calibrate(int rounds)
         {
+
+            /*
+                Калибровка гироскопа.
+                Для калибровки гироскопа необходимо держать датчик неподвижным.
+            */
+
             float gxsum = 0.0f, gysum = 0.0f, gzsum = 0.0f;
             float gxoffset = 0.0f, gyoffset = 0.0f, gzoffset = 0.0f;
 
@@ -190,7 +226,7 @@ class Gyroscope: public Sensor3Axis
 
             for (int i; i < rounds; i++)
             {
-                get_raw_data();
+                get_binary_data();
                 get_sample();
 
                 std::cout << "gx = " << gx << " gy = " << gy << " gz = " << gz << std::endl;
@@ -209,6 +245,11 @@ class Gyroscope: public Sensor3Axis
 
 class Magnetometer: public Sensor3Axis
 {
+
+    /*
+        Базовый класс для трехосевых магнетометров
+    */
+
     private:
 
         float mx, my, mz;
@@ -216,7 +257,7 @@ class Magnetometer: public Sensor3Axis
 
     public:
 
-        void getX(float &x, float &y ,float &z)
+        void get_3d_magnitude(float &x, float &y ,float &z)
         {
             x = this->mx;
             y = this->my;
@@ -245,7 +286,7 @@ class Magnetometer: public Sensor3Axis
 
     protected:
 
-        void setX(float x, float y, float z)
+        void set_3d_mgnitude(float x, float y, float z)
         {
             this->mx = x;
             this->my = y;
@@ -259,6 +300,13 @@ class Magnetometer: public Sensor3Axis
 
         void calibrate(int rounds)
         {
+
+            /*
+                Калибровка магнетометра.
+                Для калибровки магнетометра необходимо вращать датчик 
+                вокруг трех осей во всех направлениях.
+            */
+
             float mxmax = -32768.0f, mymax = -32768.0f, mzmax = -32768.0f;
             float mxmin = 32767.0f, mymin = 32767.0f, mzmin = 32767.0f;
             float mxoffset = 0.0f, myoffset = 0.0f, mzoffset = 0.0f;
@@ -270,7 +318,7 @@ class Magnetometer: public Sensor3Axis
 
             for (int i = 0; i < rounds; i++)
             {
-                get_raw_data();
+                get_binary_data();
                 get_sample();
 
                 std::cout << "mx = " << mx << " my = " << my << " mz = " << mz << std::endl;
@@ -302,6 +350,11 @@ class Magnetometer: public Sensor3Axis
 
 class Barometer : public Sensor
 {
+
+    /*
+        Базовый класс для барометров
+    */
+
     protected:
 
         double Pressure;

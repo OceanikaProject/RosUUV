@@ -58,11 +58,10 @@ add_message_files(
 )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+  FILES
+  MoveForward.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -190,6 +189,7 @@ catkin_install_python(PROGRAMS
   scripts/joystick_driver.py
   scripts/control.py
   scripts/hand.py
+  scripts/autocontrol.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

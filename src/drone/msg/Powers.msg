@@ -1,8 +1,8 @@
 std_msgs/Header Header
-uint16 left_alt_pwm
-uint16 right_alt_pwm
-uint16 left_heading_pwm
-uint16 right_heading_pwm
-uint16 back_alt_pwm
-uint16 Light_pwm
+int8 left_alt_power
+int8 right_alt_power
+int8 left_heading_power
+int8 right_heading_power
+int8 back_alt_power
+uint8 light_mode
 bool lock

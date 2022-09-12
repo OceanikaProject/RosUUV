@@ -5,7 +5,7 @@ import serial
 import struct
 from std_msgs.msg import Int16
 from geometry_msgs.msg import PoseStamped
-from drone.msg import Joystick, Powers
+from drone.msg import Joystick
 from tf.transformations import euler_from_quaternion
 from math import atan2, asin
 
@@ -68,11 +68,10 @@ class Control:
         }
 
         self.pub_hand = rospy.Publisher("/hand_angle", Int16, queue_size=1)
-        self.powers_msg = Powers()
         self.power_hand = Int16()
         # rospy.Subscriber("esp", Joystick, self.control_callback)
         joystick_subscriber = message_filters.Subscriber("joystick_state", Joystick)
-        navigation_subscriber = message_filters.Subscriber("talker_topic", PoseStamped)
+        navigation_subscriber = message_filters.Subscriber("navigation_module", PoseStamped)
         self.ts = message_filters.TimeSynchronizer([joystick_subscriber, navigation_subscriber], 10)
         self.ts.registerCallback(self.control_callback)
         # self.pid_roll = PID(2, 0, 0)
@@ -209,13 +208,7 @@ class Control:
         q2 = navigation_msg.pose.orientation.y
         q3 = navigation_msg.pose.orientation.z
 
-        # pitch = atan2(2*q2*q3 - 2*q0*q1, 2*q0*q0 + 2*q3*q3 - 1)
-        # roll = -asin(2*q1*q3 + 2*q0*q2)
-        # yaw = atan2(2*q1*q2 - 2*q0*q3, 2*q0*q0 + 2*q1*q1 - 1)
-
-        # pitch *= 57.2958
-        # print(roll, pitch, yaw)
-
+        
         dt = rospy.Time.now() - self.t
 
 
@@ -238,7 +231,6 @@ class Control:
         self.pid_depth.set_target(depth_gains['target'])
         self.pid_pitch.set_target(pitch_gains['target'])
 
-        #rospy.loginfo("stabilization_on %s" % str(stabilization_on))
         if stabilization_on:
             if lx in range(-12, 13) and ly in range(-12, 13):
                 pitch_power = self.pid_pitch.control(pitch, dt)

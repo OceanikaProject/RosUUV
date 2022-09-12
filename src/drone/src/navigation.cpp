@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 
     ros::init(argc, argv, "talker");
     ros::NodeHandle n;
-    ros::Publisher pub = n.advertise<geometry_msgs::PoseStamped>("talker_topic", 1000);
+    ros::Publisher pub = n.advertise<geometry_msgs::PoseStamped>("navigation_module", 2);
     ros::Rate loop_rate(100);
 
     const bool DEBUG = n.hasParam("/talker_node/DEBUG");
@@ -68,17 +68,17 @@ int main(int argc, char **argv)
 
     while (ros::ok())
     {
-        imu.get_raw_data();
-        compass.get_raw_data();
-        bar.get_raw_data();
+        imu.get_binary_data();
+        compass.get_binary_data();
+        bar.get_binary_data();
 
         imu.Accelerometer::get_sample();
         imu.Gyroscope::get_sample();
         compass.get_sample();
 
-        imu.Accelerometer::getX(ax, ay, az);
-        imu.Gyroscope::getX(gx, gy, gz);
-        compass.getX(mx, my, mz);
+        imu.Accelerometer::get_3d_magnitude(ax, ay, az);
+        imu.Gyroscope::get_3d_magnitude(gx, gy, gz);
+        compass.get_3d_magnitude(mx, my, mz);
 
         ax = -ax; ay = -ay; az = -az;
         gx = -gx; gy = -gy; gz = -gz;
