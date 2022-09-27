@@ -255,9 +255,9 @@ class MS5837_30BA : public Barometer
 
     public:
     
-        const static float Pa = 100.0f;
-        const static float bar = 0.001f;
-        const static float mbar = 1.0f;
+        const float Pa = 100.0f;
+        const float bar = 0.001f;
+        const float mbar = 1.0f;
         unsigned int C[8];
 
         MS5837_30BA() : Barometer::Barometer() {}
@@ -266,7 +266,7 @@ class MS5837_30BA : public Barometer
         
         void get_binary_data();                            // Чтение сырых битовых данных
 
-        void set_conversion(float conversion = Pa)
+        void set_conversion(float conversion = 100.0f)
         {
             this->conversion = conversion;
         }

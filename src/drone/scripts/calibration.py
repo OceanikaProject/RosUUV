@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from abc import abstractmethod
 import smbus
 import os

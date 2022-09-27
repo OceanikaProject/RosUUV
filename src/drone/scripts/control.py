@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import rospy
 import message_filters
 import serial
@@ -82,8 +82,8 @@ class Control:
         # self.pid_yaw = PID(2, 0, 0)
         self.pid_depth = PID(depth_gains['P'], depth_gains['I'], depth_gains['D'])
 
-        self.oceanic_yaml = "/home/ubuntu/drone_ros/src/drone/config/oceanic.yaml"
-        self.pid_yaml = "/home/ubuntu/drone_ros/src/drone/config/pid.yaml"
+        self.oceanic_yaml = "/home/pi/drone_ros/src/drone/config/oceanic.yaml"
+        self.pid_yaml = "/home/pi/drone_ros/src/drone/config/pid.yaml"
 
         self.t = rospy.Time.now()
 

@@ -1,0 +1,5 @@
+float32 seconds
+---
+bool completed
+---
+float32 seconds_left

@@ -3,10 +3,10 @@
     <rosparam command="load" file="$(find drone)/config/oceanic.yaml" />
     <rosparam command="load" file="$(find drone)/config/calibration.yaml"/>
     <rosparam command="load" file="$(find drone)/config/auto.yaml"/>
-     <!-- <node pkg="drone" type="navigation" name="talker_node">
+     <node pkg="drone" type="navigation" name="talker_node">
         <param name="DEBUG" value="true"/>
         <param name="CALIBRATED" value="true"/>
-     </node> -->
+     </node>
    
     <node pkg="drone" type="autocontrol.py" name="autocontrol" output="screen"></node>
     <!-- <node pkg="drone" type="hand.py" name="hand" output="screen"></node>

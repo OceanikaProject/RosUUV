@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from __future__ import print_function
 from drone.srv import MoveForward
@@ -10,6 +10,13 @@ def move(req):
     rospy.set_param("/forward/power", req.power)
     rospy.sleep(req.duration)
     rospy.set_param("/forward/power", 0)
+
+    r = rospy.Rate(10)
+
+    for i in range(int(req.duration * 10)):
+        rospy.set_param("/up/power", req.power)
+        r.sleep()
+    rospy.set_param("/up/power", 0)
 
 
 def move_forward_server():

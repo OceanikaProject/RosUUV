@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import rospy
 import serial
 import struct
@@ -34,6 +34,7 @@ class Autocontrol:
         while not rospy.is_shutdown():
             forward_power = Autocontrol.constrain(rospy.get_param("forward")["power"], 100, -100)
             up_power = Autocontrol.constrain(rospy.get_param("up")["power"], 100, -100)
+            # turn_power = Autocontrol.constrain(rospy.get_param("turn")["power"], 100, -100)
             self.serial_frame["data"][0] = up_power
             self.serial_frame["data"][1] = forward_power
             self.serial_frame["data"][2] = forward_power

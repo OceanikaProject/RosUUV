@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from abc import abstractmethod
 from std_msgs.msg import String, Float32MultiArray
 from geometry_msgs.msg import PoseStamped
