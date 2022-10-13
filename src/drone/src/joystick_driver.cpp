@@ -12,6 +12,19 @@
 
 using namespace std;
 
+unsigned int constrain(unsigned int value, unsigned int min_value, unsigned int max_value)
+{
+ if (value < min_value)
+ {
+  return min_value;
+ }
+ if (value > max_value)
+ {
+  return max_value;
+ }
+ return value;
+}
+
 void error( char *msg)
 {
  perror(msg);
@@ -26,14 +39,14 @@ int main(int argc, char **argv)
     ros::Publisher pub = n.advertise<drone::Joystick>("joystick_state", 1000);
     ros::Rate loop_rate(1000);
 
-     int sockfd;
-     sockfd = socket(AF_INET,SOCK_DGRAM,0);
-     struct sockaddr_in serv,client;
+    int sockfd;
+    sockfd = socket(AF_INET,SOCK_DGRAM,0);
+    struct sockaddr_in serv,client;
 
-     serv.sin_family = AF_INET;
-     serv.sin_port = htons(1234);
+    serv.sin_family = AF_INET;
+    serv.sin_port = htons(1234);
     //  serv.sin_addr.s_addr = inet_addr("192.168.1.84");
-    serv.sin_addr.s_addr = inet_addr("192.168.88.1");
+    serv.sin_addr.s_addr = inet_addr("192.168.88.155");
 
 
      bind(sockfd,(struct sockaddr *)&serv,sizeof(serv));
@@ -51,12 +64,12 @@ int main(int argc, char **argv)
         recvfrom(sockfd,esp8266_data,len,0,(struct sockaddr *)&client,&l);
 
         drone::Joystick msg;
-        if (esp8266_data[0] == 0x77)
+        if (esp8266_data[0] == 0x77 and esp8266_data[1])
         {
-            msg.left_x = esp8266_data[4] | esp8266_data[5] << 8;
-            msg.left_y = esp8266_data[6] | esp8266_data[7] << 8;
-            msg.right_x = esp8266_data[8] | esp8266_data[9] << 8;
-            msg.right_y = esp8266_data[10] | esp8266_data[11] << 8;
+            msg.left_x = constrain(esp8266_data[4] | esp8266_data[5] << 8, 0, 1023);
+            msg.left_y = constrain(esp8266_data[6] | esp8266_data[7] << 8, 0, 1023);
+            msg.right_x = constrain(esp8266_data[8] | esp8266_data[9] << 8, 0, 1023);
+            msg.right_y = constrain(esp8266_data[10] | esp8266_data[11] << 8, 0, 1023);
 
             msg.Short.A = esp8266_data[14];
             msg.Short.B = esp8266_data[15];

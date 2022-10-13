@@ -9,6 +9,7 @@
      </node>
    
     <node pkg="drone" type="autocontrol.py" name="autocontrol" output="screen"></node>
+    <!-- <node pkg="drone" type="sheet.py" name="sheet" output="screen"></node> -->
     <!-- <node pkg="drone" type="hand.py" name="hand" output="screen"></node>
 
     <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />

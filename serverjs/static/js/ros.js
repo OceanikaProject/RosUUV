@@ -1,4 +1,4 @@
-ros_ip_address = '192.168.88.1'  
+ros_ip_address = '192.168.88.155'  
 
 
 var ros = new ROSLIB.Ros({

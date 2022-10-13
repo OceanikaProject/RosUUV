@@ -3,4 +3,5 @@ build/
 .idea/
 .catkin_workspace
 src/CMakeLists.txt
+src/arduino/build*
 serverjs/node_modules

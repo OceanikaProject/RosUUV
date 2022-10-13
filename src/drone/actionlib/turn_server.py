@@ -3,9 +3,10 @@
 import rospy
 import actionlib
 import sys
-from drone.msg import DiveAction, DiveResult, DiveFeedback
+from drone.msg import TurnAction, TurnResult, TurnFeedback
 # from drone import PID
 from geometry_msgs.msg import PoseStamped
+from tf.transformations import euler_from_quaternion
 
 class PID:
 
@@ -51,53 +52,65 @@ class PID:
         self.Kd = D
 
 
-class DiveActionServer:
-    _feedback = DiveFeedback()
-    _result = DiveResult()
+class TurnActionServer:
+    _feedback = TurnFeedback()
+    _result = TurnResult()
 
     def __init__(self):
-        self.server = actionlib.SimpleActionServer('dive', DiveAction, execute_cb=self.execute, auto_start=False)
+        self.server = actionlib.SimpleActionServer('turn', TurnAction, execute_cb=self.execute, auto_start=False)
         self.server.start()
 
     def execute(self, goal):
         def cb(msg):
-            self.depth = msg.pose.position.z
-            print(self.depth)
+            _, _, self.yaw = euler_from_quaternion([
+           navigation_msg.pose.orientation.x,
+           navigation_msg.pose.orientation.y,
+           navigation_msg.pose.orientation.z,
+           navigation_msg.pose.orientation.w
+        ])
+            print(self.yaw)
         sub = rospy.Subscriber("navigation_module", PoseStamped, cb)
         
         r = rospy.Rate(10)
         r.sleep()
-        depth_gains = rospy.get_param('PidDepth')
-        pid = PID(depth_gains['P'], depth_gains['I'], depth_gains['D'])
+        yaw_gains = rospy.get_param('PidYaw')
+        pid = PID(yaw_gains['P'], yaw_gains['I'], yaw_gains['D'])
 
-        if goal.target == 'up':
-            pid.set_target(self.depth + 0.2)
-        elif goal.target == 'down':
-            pid.set_target(self.depth - 0.2)
-        # pid.set_target(goal.target)
+        self.yaw -= 180
+        pid.set_target(0)
+        target = self.yaw
+        if goal.target == 'left':
+            target -= 90
+        elif goal.target == 'right':
+            target += 90
 
-        rospy.loginfo('Get target depth - %s (%f)' % (goal.target, self.depth))
+        rospy.loginfo('Get target yaw - %s (%f)' % (goal.target, self.yaw))
 
         t = rospy.Time.now()
 
-        while not (self.depth - 0.05 < goal.target < self.depth + 0.05 or rospy.is_shutdown()):
+        while not (self.yaw - 3 < goal.target < self.yaw + 3 or rospy.is_shutdown()):
             if self.server.is_preempt_requested():
                 self.server.set_preempted()
                 break
             dt = rospy.Time.now() - t
             t = rospy.Time.now()
             print(dt, dt.to_sec())
-            power = pid.control(self.depth, dt)
+            if self.yaw - target < -180:
+                power = pid.control(self.yaw - target + 360, dt)   
+            elif self.yaw - target > 180:
+                power = pid.control(self.yaw - target - 360, dt)
+            else:      
+                power = pid.control(self.yaw, dt)
             rospy.loginfo('%f' % power)
 
-            rospy.set_param("/up/power", power)
-            self.server.publish_feedback(DiveFeedback(self.depth))
+            rospy.set_param("/turn/power", power)
+            self.server.publish_feedback(TurnFeedback(self.yaw))
             r.sleep()
-        rospy.set_param("/up/power", 0)
-        self.server.set_succeeded(DiveResult(self.depth))
+        rospy.set_param("/turn/power", 0)
+        self.server.set_succeeded(TurnResult(self.yaw))
         sub.unregister()
 
 if __name__ == "__main__":
-    rospy.init_node("dive_server")
-    server = DiveActionServer()
+    rospy.init_node("turn_server")
+    server = TurnActionServer()
     rospy.spin()

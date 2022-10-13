@@ -8,3 +8,7 @@ PidPitch:
   I: 0.12
   P: 0.25
   target: 0
+PidYaw:
+  D: 0
+  I: 0
+  P: 0.5

@@ -26,7 +26,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
+catkin_python_setup()
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -58,6 +58,7 @@ add_message_files(
   Joystick_Buttons.msg
   Joystick.msg
   Powers.msg
+  Teleop.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -73,6 +74,7 @@ add_action_files(
   DoDishes.action
   Fibonacci.action
   Dive.action
+  Turn.action
 )
 
 ## Generate added messages and services with any dependencies listed here
@@ -146,8 +148,7 @@ add_library(MadgwickFilter src/MadgwickFilter.cpp)
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(navigation src/navigation.cpp)
 add_executable(joystick_driver src/joystick_driver.cpp)
-add_executable(calibration src/calibration.cpp)
-#add_executable(control src/control.cpp)
+add_executable(j_driver2 src/j_driver2.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -171,14 +172,8 @@ target_link_libraries(
 )
 
 target_link_libraries(joystick_driver ${catkin_LIBRARIES})
-target_link_libraries(
-  calibration
-  sensors
-  I2C
-  ${catkin_LIBRARIES}
-)
+target_link_libraries(j_driver2 ${catkin_LIBRARIES})
 
-#target_link_libraries(control ${catkin_LIBRARIES})
 
 #############
 ## Install ##
@@ -190,13 +185,10 @@ target_link_libraries(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-#  scripts/navigation.py
   scripts/calibration.py
-  scripts/joystick_driver.py
   scripts/control.py
   scripts/hand.py
   scripts/autocontrol.py
-  scripts/PID.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

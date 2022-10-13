@@ -1,6 +1,6 @@
-<launch>
+	<launch>
 
-    <machine name="oceanika" address="192.168.88.155" env-loader="/opt/ros/noetic/env.sh" user="oceanika" />
+    <machine name="ocea" address="192.168.88.155" env-loader="/opt/ros/noetic/env.sh user="oceanika" />
 
     <rosparam command="load" file="$(find drone)/config/pid.yaml" />
     <rosparam command="load" file="$(find drone)/config/oceanic.yaml" />
@@ -11,16 +11,15 @@
      <node pkg="drone" type="joystick_driver" name="joystick_driver"></node>
      <node pkg="drone" type="navigation" name="talker_node">
         <param name="CALIBRATED" value="true"/>
-        <param name="DEBUG" value="true"/>
      </node>
    
     <node pkg="drone" type="control.py" name="control" output="screen"></node>
    <node pkg="drone" type="hand.py" name="hand" output="screen"/>
 
-    <!-- <node pkg="web_video_server" type="web_video_server" name="web_video_server">
+    <node pkg="web_video_server" type="web_video_server" name="web_video_server">
         <param name="port" value="8081" />
         <param name="address" value="192.168.88.155" />
-    </node> -->
+    </node>
     <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
     
 </launch>

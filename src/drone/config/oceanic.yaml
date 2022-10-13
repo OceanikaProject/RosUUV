@@ -16,7 +16,7 @@ vertical_back:
   reversed: true
 vertical_left:
   pin: 5
-  reversed: false
+  reversed: 'true'
 vertical_right:
   pin: 3
   reversed: true

@@ -14,7 +14,7 @@
 
     <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
 
-    <include file="$(find raspicam_node)/launch/camerav2_320x240_30fps.launch">
+    <include file="$(find raspicam_node)/launch/camerav2_320x240.launch">
         <arg name="enable_raw" value="true" />
     </include>
 

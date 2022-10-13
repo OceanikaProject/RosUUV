@@ -161,8 +161,8 @@ class Control:
             divisor = 1
 
         stabilization_on = not (joystick_msg.State & 0b00000001)
-        self.powers_msg.lock = (joystick_msg.State & 0b00000010) >> 1
-        self.serial_frame["data"][6] = self.powers_msg.lock
+        self.serial_frame["data"][6] = (joystick_msg.State & 0b00000010) >> 1
+        
         yaw_on = (joystick_msg.State & 0b00001000) >> 3
         tangage_on = (joystick_msg.State & 0b00010000) >> 4
 
