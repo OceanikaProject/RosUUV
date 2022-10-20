@@ -1,11 +1,10 @@
-#include <math.h>
 #include "drone/MadgwickFilter.h"
 
 //-------------------------------------------------------------------------------------------
 // Definitions
 
-#define sampleFreqDef   15.0f          // sample frequency in Hz
-#define betaDef         0.1f            // 2 * proportional gain
+#define sampleFreqDef   20.0f          // sample frequency in Hz
+#define betaDef         0.041f            // 2 * proportional gain
 
 
 //============================================================================================

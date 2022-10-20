@@ -137,6 +137,7 @@ include_directories(
 add_library(sensors src/sensors.cpp)
 add_library(I2C src/I2C.cpp)
 add_library(MadgwickFilter src/MadgwickFilter.cpp)
+add_library(ComplementaryFilter src/ComplementaryFilter.cpp)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -168,6 +169,7 @@ target_link_libraries(
   sensors
   I2C
   MadgwickFilter
+  ComplementaryFilter
   ${catkin_LIBRARIES}
 )
 
@@ -189,6 +191,7 @@ catkin_install_python(PROGRAMS
   scripts/control.py
   scripts/hand.py
   scripts/autocontrol.py
+  scripts/pitch_keeper.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

@@ -55,6 +55,7 @@ class UUV(object):
         client.wait_for_result()
         return client.get_result()
 
+
     def wait(self):
         rospy.sleep(1)
 

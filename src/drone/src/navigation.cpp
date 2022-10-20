@@ -5,6 +5,7 @@
 #include "geometry_msgs/Vector3.h"
 #include <fcntl.h>
 #include "drone/MadgwickFilter.h"
+#include "drone/ComplementaryFilter.h"
 
 
 #define I2C_BUS "/dev/i2c-1"
@@ -13,22 +14,24 @@
 int main(int argc, char **argv)
 {
 
-   int fd;
+    int fd;
 
-   if ((fd = open(I2C_BUS, O_RDWR)) < 0)
-   {
+    if ((fd = open(I2C_BUS, O_RDWR)) < 0)
+    {
        // Open port for reading and writing
 
        fprintf(stderr, "Failed to open i2c bus %s\n", I2C_BUS);
 
        exit(1);
-   }
+    }
 
-   I2C i2c1((char*) I2C_BUS);
+    I2C i2c1((char*) I2C_BUS);
 
     ros::init(argc, argv, "talker");
     ros::NodeHandle n;
     ros::Publisher pub = n.advertise<geometry_msgs::PoseStamped>("navigation_module", 2);
+    ros::Publisher imu_pub = n.advertise<sensor_msgs::Imu>("/imu_data", 2);
+
     ros::Rate loop_rate(100);
 
     const bool DEBUG = n.hasParam("/talker_node/DEBUG");
@@ -43,22 +46,25 @@ int main(int argc, char **argv)
 
    if (DEBUG)
    {
-    acceleration_pub = n.advertise<geometry_msgs::Vector3>("acceleration", 1000);
-    rotation_pub = n.advertise<geometry_msgs::Vector3>("rotation", 1000);
-    magnetism_pub = n.advertise<geometry_msgs::Vector3>("magnetism", 1000);
-    euler_pub = n.advertise<geometry_msgs::Vector3>("euler", 1000);
+        acceleration_pub = n.advertise<geometry_msgs::Vector3>("acceleration", 1000);
+        rotation_pub = n.advertise<geometry_msgs::Vector3>("rotation", 1000);
+        magnetism_pub = n.advertise<geometry_msgs::Vector3>("magnetism", 1000);
+        euler_pub = n.advertise<geometry_msgs::Vector3>("euler", 1000);
    }
 
 
-   MPU6050 imu;
-   QMC5883 compass;
-   MS5837_30BA bar;
-   MadgwickFilter ahrs;
+    MPU6050 imu(MPU6050::CONVERT_2G, MPU6050::CONVERT_500DEG);
+    QMC5883 compass;
+    MS5837_30BA bar;
+    // MadgwickFilter ahrs;
+    ComplementaryFilter ahrs(0.5);
 
-   imu.startup(i2c1, fd);
-   compass.startup(i2c1, fd);
-   bar.startup(i2c1, fd);
-   bar.set_conversion(bar.Pa);
+   
+
+    imu.startup(i2c1, fd);
+    compass.startup(i2c1, fd);
+    bar.startup(i2c1, fd);
+    bar.set_conversion(bar.Pa);
 
     float ax, ay, az;
     float gx, gy, gz;
@@ -66,8 +72,18 @@ int main(int argc, char **argv)
     float axoffset, ayoffset, azoffset, gxoffset, gyoffset, gzoffset;
     float mxoffset, myoffset, mzoffset, mxscale, myscale, mzscale;
 
+    float sampleFrequency, beta;
+
+    double time_moment = ros::Time::now().toSec();
+    double dt;
+
     while (ros::ok())
     {
+
+        // n.getParam("/sampleFrequency", sampleFrequency);
+        // n.getParam("/beta", beta);
+        // ahrs.begin(sampleFrequency, beta);
+
         imu.get_binary_data();
         compass.get_binary_data();
         bar.get_binary_data();
@@ -80,9 +96,9 @@ int main(int argc, char **argv)
         imu.Gyroscope::get_3d_magnitude(gx, gy, gz);
         compass.get_3d_magnitude(mx, my, mz);
 
-        ax = -ax; ay = -ay; az = -az;
-        gx = -gx; gy = -gy; gz = -gz;
-        mx = -mx; my = -my; mz = -mz;
+        // ax = -ax; ay = -ay; az = -az;
+        // gx = -gx; gy = -gy; gz = -gz;
+        // mx = -mx; my = -my; mz = -mz;
 
         if (CALIBRATED)
         {
@@ -110,10 +126,12 @@ int main(int argc, char **argv)
             mz = (mz - mzoffset) * mzscale;
         }
 
-
-        ahrs.update(gx, gy, gz, ax, ay, az, -mx, my, mz);
+        dt = ros::Time::now().toSec() - time_moment;
+        ahrs.update(gx, gy, gz, ax, ay, az, mx, my, mz, dt);
+        time_moment = ros::Time::now().toSec();
 
         geometry_msgs::PoseStamped msg;
+        sensor_msgs::Imu imu_msg;
 
         if (DEBUG)
         {
@@ -143,17 +161,39 @@ int main(int argc, char **argv)
             magnetism_pub.publish(magnetism_msg);
             euler_pub.publish(euler_msg);
         }
+        // cout << dt << endl;
+        // cout << ahrs.q[0] << " | " << ahrs.q[1] << " | " << ahrs.q[2] << " | " << ahrs.q[3] << endl;
 
-        msg.pose.orientation.w = ahrs.q0;
-        msg.pose.orientation.x = ahrs.q1;
-        msg.pose.orientation.y = ahrs.q2;
-        msg.pose.orientation.z = ahrs.q3;
+        imu_msg.orientation.w = ahrs.q[0];
+        imu_msg.orientation.x = ahrs.q[1];
+        imu_msg.orientation.y = ahrs.q[2];
+        imu_msg.orientation.z = ahrs.q[3];
+
+        imu_msg.orientation_covariance = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+        imu_msg.angular_velocity.x = gx;
+        imu_msg.angular_velocity.y = gy;
+        imu_msg.angular_velocity.z = gz;
+
+        imu_msg.angular_velocity_covariance = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+        imu_msg.linear_acceleration.x = ax;
+        imu_msg.linear_acceleration.y = ay;
+        imu_msg.linear_acceleration.z = az;
+
+        imu_msg.linear_acceleration_covariance = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+        msg.pose.orientation.w = ahrs.q[0];
+        msg.pose.orientation.x = ahrs.q[1];
+        msg.pose.orientation.y = ahrs.q[2];
+        msg.pose.orientation.z = ahrs.q[3];
 
         msg.pose.position.x = 0;
         msg.pose.position.y = 0;
         msg.pose.position.z = bar.getDepth();
 
         pub.publish(msg);
+        imu_pub.publish(imu_msg);
         ros::spinOnce();
         loop_rate.sleep();
     }

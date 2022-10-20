@@ -12,3 +12,5 @@ PidYaw:
   D: 0
   I: 0
   P: 0.5
+beta: 0.041
+sampleFrequency: 14.5

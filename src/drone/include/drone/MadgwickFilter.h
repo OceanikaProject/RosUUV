@@ -1,12 +1,18 @@
 #if !defined( MADGWICK_FILTER_H )
 #define MADGWICK_FILTER_H
 
+#include <math.h>
+
 
 class MadgwickFilter
 {
   public:
     MadgwickFilter();
-    void begin(float sampleFrequency) { invSampleFreq = 1.0f / sampleFrequency; }
+    void begin(float sampleFreq, float betaDef) 
+    { 
+        invSampleFreq = 1.0f / sampleFreq;
+        beta = betaDef;
+    }
     void update(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz);
     void updateIMU(float gx, float gy, float gz, float ax, float ay, float az);
     float invSqrt(float x);

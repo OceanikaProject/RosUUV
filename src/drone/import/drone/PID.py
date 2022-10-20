@@ -1,42 +1,44 @@
 class PID:
 
-    def __init__(self, Kp, Ki, Kd):
-        self.prev_error = 0
-        self.proportional = 0
-        self.integral = 0
-        self.derivative = 0
-        self.Kp = Kp
-        self.Ki = Ki
-        self.Kd = Kd
+    def __init__(self, Kp, Ki, Kd, lower_limit=-100, higher_limit=100):
+        self.__prev_error = 0
+        self.__proportional = 0
+        self.__integral = 0
+        self.__derivative = 0
+        self.__Kp = Kp
+        self.__Ki = Ki
+        self.__Kd = Kd
+        self.__lower_limit = lower_limit
+        self.__higher_limit = higher_limit
 
-        self.target = 0
+        self.__target = 0
 
     @staticmethod
-    def constrain(value, lower_limit, higher_limit):
-        if value < lower_limit: value = lower_limit
-        if value > higher_limit: value = higher_limit
+    def __constrain(value):
+        if value < self.__lower_limit: value = self.__lower_limit
+        if value > self.__higher_limit: value = self.__higher_limit
         return value
 
     def control(self, current, dt):
         dt = dt.to_sec()
-        error = float(current - self.target)
-        self.proportional = error * self.Kp
-        self.integral += PID.constrain(error * dt * self.Ki, -100, 100)
-        self.derivative = (error - self.prev_error) / dt * self.Kd
-        self.prev_error = error
-        return PID.constrain(self.proportional + self.integral + self.derivative, -100, 100)
+        error = float(current - self.__target)
+        self.__proportional = error * self.__Kp
+        self.__integral += PID.__constrain(error * dt * self.__Ki)
+        self.__derivative = (error - self.prev_error) / dt * self.__Kd
+        self.__prev_error = error
+        return int(PID.__constrain(self.__proportional + self.__integral + self.__derivative))
 
     def break_pid(self):
-        self.proportional = 0
-        self.integral = 0
-        self.derivative = 0
+        self.__proportional = 0
+        self.__integral = 0
+        self.__derivative = 0
 
     def set_target(self, target):
-        if target != self.target:
+        if target != self.__target:
             self.break_pid
-        self.target = target
+        self.__target = target
 
     def set_gains(self, P, I, D):
-        self.Kp = P
-        self.Ki = I
-        self.Kd = D
+        self.__Kp = P
+        self.__Ki = I
+        self.__Kd = D

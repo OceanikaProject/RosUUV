@@ -64,27 +64,29 @@ class MPU6050 : public Accelerometer, public Gyroscope
 
     const char MPU6050_ADDR = 0x68;
 
-    enum ACCEL_CONVERSION
-    {
-        CONVERT_2G = 2,
-        CONVERT_4G = 4,
-        CONVERT_8G = 8,
-        CONVERT_16G = 16
-    };
-
-    enum GYRO_CONVERSION
-    {
-        CONVERT_250DEG = 250,
-        CONVERT_500DEG = 500,
-        CONVERT_1000DEG = 1000,
-        CONVERT_2000DEG = 2000
-    };
+    
 
     I2C bus;
     int fd;
     char accelerometer_range_configuration, gyroscope_range_configuration;
 
     public:
+
+        enum ACCEL_CONVERSION
+        {
+            CONVERT_2G = 2,
+            CONVERT_4G = 4,
+            CONVERT_8G = 8,
+            CONVERT_16G = 16
+        };
+
+        enum GYRO_CONVERSION
+        {
+            CONVERT_250DEG = 250,
+            CONVERT_500DEG = 500,
+            CONVERT_1000DEG = 1000,
+            CONVERT_2000DEG = 2000
+        };
 
         MPU6050();
 

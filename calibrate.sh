@@ -1,4 +1,4 @@
-. ~/drone_ros/devel/setup.bash
+. /home/pi/drone_ros/devel/setup.bash
 systemctl stop oceanika.service
 echo "oceanika.service stop"
 sleep 2

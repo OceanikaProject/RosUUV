@@ -57,7 +57,7 @@ void MPU6050::startup(I2C bus, int fd)
     this->bus.selectDevice(this->fd, MPU6050_ADDR, "MPU6050");
 
     this->bus.i2c_write_register(this->fd, DIV, 7);
-    this->bus.i2c_write_register(this->fd, PWR_M, 1);
+    this->bus.i2c_write_register(this->fd, PWR_M, 0);
     this->bus.i2c_write_register(this->fd, CONFIG, 0);
     this->bus.i2c_write_register(this->fd, GYRO_CONFIG, this->gyroscope_range_configuration);
     this->bus.i2c_write_register(this->fd, ACCEL_CONFIG, this->accelerometer_range_configuration);

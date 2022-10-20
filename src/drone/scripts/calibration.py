@@ -429,7 +429,7 @@ class InertialNavigationSystem:
         rospy.sleep(4)
         for _ in range(rounds):
             self.set_real_sensor_values()
-            self._mx, self._my, self._mz = -self._mx, -self._my, -self._mz
+            # self._mx, self._my, self._mz = -self._mx, -self._my, -self._mz
             print(self._mx, self._my, self._mz)
 
             xmin = min(xmin, self._mx)
@@ -479,8 +479,8 @@ class InertialNavigationSystem:
         rospy.sleep(6)
         for _ in range(rounds):
             self.set_real_sensor_values()
-            self._ax, self._ay, self._az = -self._ax, -self._ay, -self._az
-            self._gx, self._gy, self._gz = -self._gx, -self._gy, -self._gz
+            # self._ax, self._ay, self._az = -self._ax, -self._ay, -self._az
+            # self._gx, self._gy, self._gz = -self._gx, -self._gy, -self._gz
 
             print(round(self._ax, 2), round(self._ay, 2), round(self._az, 2), round(self._gx, 2), round(self._gy, 2),
                   round(self._gz, 2))
