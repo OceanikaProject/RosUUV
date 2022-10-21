@@ -69,6 +69,7 @@ int main(int argc, char **argv)
     float ax, ay, az;
     float gx, gy, gz;
     float mx, my, mz;
+    float yaw;
     float axoffset, ayoffset, azoffset, gxoffset, gyoffset, gzoffset;
     float mxoffset, myoffset, mzoffset, mxscale, myscale, mzscale;
 
@@ -154,7 +155,9 @@ int main(int argc, char **argv)
 
             euler_msg.x = ahrs.getRoll();
             euler_msg.y = ahrs.getPitch();
-            euler_msg.z = ahrs.getYaw();
+            yaw = -ahrs.getYaw();
+            // if (yaw <= 0) yaw += 360; 
+            euler_msg.z = yaw;
 
             acceleration_pub.publish(acceleration_msg);
             rotation_pub.publish(rotation_msg);
