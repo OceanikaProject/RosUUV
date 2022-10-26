@@ -3,6 +3,7 @@ import rospy
 import serial
 import struct
 from std_msgs.msg import Int16
+from geometry_msgs.msg import Vector3
 from drone.PID import PID
 
 
@@ -36,18 +37,34 @@ class Autocontrol:
         self.pid.set_gains(gains['P'], gains['I'], gains['D'])
 
         dt = rospy.Time.now() - self.t
+        self.t = rospy.Time.now()
         pitch_power = self.pid.control(msg.y, dt)
+        # print(pitch_power, msg.y)
         
-        forward_power = Autocontrol.constrain(rospy.get_param("forward")["power"], 60, -60)
-        up_power = Autocontrol.constrain(rospy.get_param("up")["power"], 60, -60)
+        hand_mode = rospy.get_param("hand")["mode"]
+        if hand_mode = 1:
+            self.pub_hand.publish(1800)
+        elif hand_mode = 2:
+            self.pub_hand.publish(1200)
+        else:
+            self.pub_hand.publish(1500)
+
+        horizontal_left = Autocontrol.constrain(rospy.get_param("horizontal_left")["power"], 60, -60)
+        horizontal_right = Autocontrol.constrain(rospy.get_param("horizontal_right")["power"], 60, -60)
+        vertical_back = Autocontrol.constrain(rospy.get_param("vertical_back")["power"], 60, -60)
+        vertical_left = Autocontrol.constrain(rospy.get_param("vertical_left")["power"], 60, -60)
+        vertical_right = Autocontrol.constrain(rospy.get_param("vertical_right")["power"], 60, -60)
+
+        # forward_power = Autocontrol.constrain(rospy.get_param("forward")["power"], 60, -60)
+        # up_power = Autocontrol.constrain(rospy.get_param("up")["power"], 60, -60)
         light_mode = rospy.get_param("light_mode")
         # speed_mode = rospy.get_param("speed_mode")
         # turn_power = Autocontrol.constrain(rospy.get_param("turn")["power"], 100, -100)
-        self.serial_frame["data"][0] = up_power - pitch_power
-        self.serial_frame["data"][1] = forward_power
-        self.serial_frame["data"][2] = forward_power
-        self.serial_frame["data"][3] = up_power + pitch_power
-        self.serial_frame["data"][4] = up_power + pitch_power
+        self.serial_frame["data"][0] = vertical_right + pitch_power
+        self.serial_frame["data"][1] = vertical_left + pitch_power
+        self.serial_frame["data"][2] = horizontal_right
+        self.serial_frame["data"][3] = horizontal_right
+        self.serial_frame["data"][4] = vertical_back - pitch_power
         self.serial_frame["data"][5] = light_mode
         # self.serial_frame["data"][6]
 
@@ -71,7 +88,6 @@ class Autocontrol:
             self.serial_frame["crc"]
         )
         self.arduino.write(msg)
-        self.pub_hand.publish(1484)
 
     
         

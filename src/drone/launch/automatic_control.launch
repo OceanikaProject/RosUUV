@@ -9,6 +9,7 @@
      </node>
    
     <node pkg="drone" type="autocontrol.py" name="autocontrol" output="screen"></node>
+    <node pkg="drone" type="dive_server.py" name="dive_server" output="screen"></node>
     <!-- <node pkg="drone" type="pitch_keeper.py", name="pitch_keeper"></node> -->
     <!-- <node pkg="drone" type="sheet.py" name="sheet" output="screen"></node> -->
     <!-- <node pkg="drone" type="hand.py" name="hand" output="screen"></node>

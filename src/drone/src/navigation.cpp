@@ -57,7 +57,7 @@ int main(int argc, char **argv)
     QMC5883 compass;
     MS5837_30BA bar;
     // MadgwickFilter ahrs;
-    ComplementaryFilter ahrs(0.5);
+    ComplementaryFilter ahrs(0.55);
 
    
 
@@ -103,9 +103,9 @@ int main(int argc, char **argv)
 
         if (CALIBRATED)
         {
-            n.getParam("/Accelerometer/axoffset", axoffset);
-            n.getParam("/Accelerometer/ayoffset", ayoffset);
-            n.getParam("/Accelerometer/azoffset", azoffset);
+            // n.getParam("/Accelerometer/axoffset", axoffset);
+            // n.getParam("/Accelerometer/ayoffset", ayoffset);
+            // n.getParam("/Accelerometer/azoffset", azoffset);
             n.getParam("/Gyroscope/gxoffset", gxoffset);
             n.getParam("/Gyroscope/gyoffset", gyoffset);
             n.getParam("/Gyroscope/gzoffset", gzoffset);
@@ -116,9 +116,9 @@ int main(int argc, char **argv)
             n.getParam("/Magnetometer/myscale", myscale);
             n.getParam("/Magnetometer/mzscale", mzscale);
             // std::cout << axoffset << " " << ayoffset << " " << azoffset << std::endl;
-            ax = ax - axoffset;
-            ay = ay - ayoffset;
-            az = az - azoffset;
+            // ax = ax - axoffset;
+            // ay = ay - ayoffset;
+            // az = az - azoffset;
             gx = gx - gxoffset;
             gy = gy - gyoffset;
             gz = gz - gzoffset;
@@ -153,9 +153,13 @@ int main(int argc, char **argv)
             magnetism_msg.y = my;
             magnetism_msg.z = mz;
 
+            float heading = atan2(my, mx) * 180 / 3.14;
+
             euler_msg.x = ahrs.getRoll();
             euler_msg.y = ahrs.getPitch();
             yaw = -ahrs.getYaw();
+
+            // cout << heading << " | " << yaw << endl;
             // if (yaw <= 0) yaw += 360; 
             euler_msg.z = yaw;
 

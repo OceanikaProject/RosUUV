@@ -80,9 +80,9 @@ class TurnActionServer:
         pid.set_target(0)
         target = self.yaw
         if goal.target == 'left':
-            target -= 90
+            target -= 30
         elif goal.target == 'right':
-            target += 90
+            target += 30
 
         rospy.loginfo('Get target yaw - %s (%f)' % (goal.target, self.yaw))
 
@@ -103,10 +103,14 @@ class TurnActionServer:
                 power = pid.control(self.yaw, dt)
             rospy.loginfo('%f' % power)
 
-            rospy.set_param("/turn/power", power)
+            # rospy.set_param("/turn/power", power)
+            rospy.set_param("/horizontal_left/power", power)
+            rospy.set_param("/horizontal_right/power", -power)
             self.server.publish_feedback(TurnFeedback(self.yaw))
             r.sleep()
-        rospy.set_param("/turn/power", 0)
+        # rospy.set_param("/turn/power", 0)
+        rospy.set_param("/horizontal_left/power", 0)
+        rospy.set_param("/horizontal_right/power", 0)
         self.server.set_succeeded(TurnResult(self.yaw))
         sub.unregister()
 

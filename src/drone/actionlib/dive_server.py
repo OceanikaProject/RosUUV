@@ -26,18 +26,25 @@ class DiveActionServer:
         r.sleep()
         depth_gains = rospy.get_param('PidDepth')
         pid = PID(depth_gains['P'], depth_gains['I'], depth_gains['D'])
+        
 
+        target = 0
         if goal.target == 'up':
-            pid.set_target(self.depth + 0.2)
+            target = self.depth + 0.2
+            print(target)
         elif goal.target == 'down':
-            pid.set_target(self.depth - 0.2)
+            target = self.depth - 0.2
+            print(target)
+        pid.set_target(target)
+
+        
         # pid.set_target(goal.target)
 
         rospy.loginfo('Get target depth - %s (%f)' % (goal.target, self.depth))
 
         t = rospy.Time.now()
 
-        while not (self.depth - 0.05 < goal.target < self.depth + 0.05 or rospy.is_shutdown()):
+        while not (self.depth - 0.05 < target < self.depth + 0.05 or rospy.is_shutdown()):
             if self.server.is_preempt_requested():
                 self.server.set_preempted()
                 break
@@ -47,10 +54,16 @@ class DiveActionServer:
             power = pid.control(self.depth, dt)
             rospy.loginfo('%f' % power)
 
-            rospy.set_param("/up/power", power)
+            # rospy.set_param("/up/power", power)
+            rospy.set_param("/vertical_left", power)
+            rospy.set_param("/vertical_right", power)
+            rospy.set_param("/vertical_back", power)
             self.server.publish_feedback(DiveFeedback(self.depth))
             r.sleep()
-        rospy.set_param("/up/power", 0)
+        # rospy.set_param("/up/power", 0)
+        rospy.set_param("/vertical_left", 0)
+        rospy.set_param("/vertical_right", 0)
+        rospy.set_param("/vertical_back", 0)
         self.server.set_succeeded(DiveResult(self.depth))
         sub.unregister()
 

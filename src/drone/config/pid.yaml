@@ -4,9 +4,9 @@ PidDepth:
   P: 50
   target: 0
 PidPitch:
-  D: 0.01
-  I: 0.12
-  P: 0.25
+  D: 0.00
+  I: 0.00
+  P: 0.5
   target: 0
 PidYaw:
   D: 0

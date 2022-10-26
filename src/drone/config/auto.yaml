@@ -9,3 +9,16 @@ right:
   duration: 0
 light_mode: 0
 speed_mode: 0
+hand:
+  mode: 0
+
+horizontal_left: 
+  power: 0
+horizontal_right:
+  power: 0
+vertical_back:
+  power: 0
+vertical_left:
+  power: 0
+vertical_right:
+  power: 0

@@ -13,8 +13,7 @@ class PID:
 
         self.__target = 0
 
-    @staticmethod
-    def __constrain(value):
+    def __constrain(self, value):
         if value < self.__lower_limit: value = self.__lower_limit
         if value > self.__higher_limit: value = self.__higher_limit
         return value
@@ -23,10 +22,10 @@ class PID:
         dt = dt.to_sec()
         error = float(current - self.__target)
         self.__proportional = error * self.__Kp
-        self.__integral += PID.__constrain(error * dt * self.__Ki)
-        self.__derivative = (error - self.prev_error) / dt * self.__Kd
+        self.__integral += self.__constrain(error * dt * self.__Ki)
+        self.__derivative = (error - self.__prev_error) / dt * self.__Kd
         self.__prev_error = error
-        return int(PID.__constrain(self.__proportional + self.__integral + self.__derivative))
+        return int(self.__constrain(self.__proportional + self.__integral + self.__derivative))
 
     def break_pid(self):
         self.__proportional = 0

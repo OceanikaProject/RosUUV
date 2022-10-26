@@ -50,17 +50,26 @@ void MadgwickFilter::update(float gx, float gy, float gz, float ax, float ay, fl
   // Compute feedback only if accelerometer measurement valid (avoids NaN in accelerometer normalisation)
   if(!((ax == 0.0f) && (ay == 0.0f) && (az == 0.0f))) {
 
-    // Normalise accelerometer measurement
-    recipNorm = invSqrt(ax * ax + ay * ay + az * az);
-    ax *= recipNorm;
-    ay *= recipNorm;
-    az *= recipNorm;
+    // // Normalise accelerometer measurement
+    // recipNorm = invSqrt(ax * ax + ay * ay + az * az);
+    // ax *= recipNorm;
+    // ay *= recipNorm;
+    // az *= recipNorm;
 
-    // Normalise magnetometer measurement
-    recipNorm = invSqrt(mx * mx + my * my + mz * mz);
-    mx *= recipNorm;
-    my *= recipNorm;
-    mz *= recipNorm;
+    // // Normalise magnetometer measurement
+    // recipNorm = invSqrt(mx * mx + my * my + mz * mz);
+    // mx *= recipNorm;
+    // my *= recipNorm;
+    // mz *= recipNorm;
+
+    float accel_length = sqrt(ax*ax + ay*ay + az*az);
+    float magn_length = sqrt(mx*mx + my*my + mz*mz);
+    ax /= accel_length;
+    ay /= accel_length;
+    az /= accel_length;
+    mx /= magn_length;
+    my /= magn_length;
+    mz /= magn_length;
 
     // Auxiliary variables to avoid repeated arithmetic
     _2q0mx = 2.0f * q0 * mx;

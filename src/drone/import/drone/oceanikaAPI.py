@@ -3,6 +3,7 @@
 import rospy
 import actionlib
 from drone.msg import TurnAction, TurnGoal
+from drone.msg import DiveAction, DiveGoal
 
 
 class UUV(object):
@@ -40,6 +41,7 @@ class UUV(object):
         return client.get_result()
 
     def dive_up(self):
+        rospy.init_node('dive_client')
         client = actionlib.SimpleActionClient('dive', DiveAction)
         client.wait_for_server()
         goal = DiveGoal(target='up')
@@ -48,6 +50,8 @@ class UUV(object):
         return client.get_result()
 
     def dive_down(self):
+        rospy.init_node('dive_client')
+
         client = actionlib.SimpleActionClient('dive', DiveAction)
         client.wait_for_server()
         goal = DiveGoal(target='down')
@@ -62,11 +66,24 @@ class UUV(object):
         for i in range(6):
             self.lights_on()
             rospy.sleep(.25)
-            self.light_off()
+            self.lights_off()
             rospy.sleep(.25)
 
     def lights_on(self):
         rospy.set_param("/light_mode", 1)
 
-    def light_off(self):
+    def lights_off(self):
         rospy.set_param("/light_mode", 0)
+
+    def close_hand(self):
+        pass
+    
+    def open_hand(self):
+        pass
+
+    def set_motor_thrust(direction, power):
+        if direction == 'up':
+            pass
+        elif direction == 'forward':
+            pass
+        elif direction == 'turn'
