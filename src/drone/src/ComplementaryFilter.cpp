@@ -25,7 +25,7 @@ void ComplementaryFilter::update(float gx, float gy, float gz, float ax, float a
     az /= accel_length;
 
     // cout << ax << " | " << ay << " | " << az << endl;
-    ROS_INFO("%f | %f | %f", ax ,ay, az);
+    // ROS_INFO("%f | %f | %f", ax ,ay, az);
 
     // // Normalise magnetometer measurement
     // recipNorm = invSqrt(mx * mx + my * my + mz * mz);

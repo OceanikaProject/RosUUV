@@ -5,10 +5,12 @@ import serial
 import struct
 from std_msgs.msg import Int16
 from geometry_msgs.msg import PoseStamped
-from drone.msg import Joystick
+from drone.msg import Joystick, Teleop, Depth
 from drone.PID import PID
 from tf.transformations import euler_from_quaternion
 from math import atan2, asin
+
+from sensor_msgs.msg import Imu, FluidPressure
 
 
 class Control:
@@ -27,9 +29,11 @@ class Control:
         self.pub_hand = rospy.Publisher("/hand_angle", Int16, queue_size=1)
         self.power_hand = Int16()
         # rospy.Subscriber("esp", Joystick, self.control_callback)
-        joystick_subscriber = message_filters.Subscriber("joystick_state", Joystick)
-        navigation_subscriber = message_filters.Subscriber("navigation_module", PoseStamped)
-        self.ts = message_filters.TimeSynchronizer([joystick_subscriber, navigation_subscriber], 10)
+        joystick_subscriber = message_filters.Subscriber("joystick_state", Teleop)
+        # navigation_subscriber = message_filters.Subscriber("navigation_module", PoseStamped)
+        imu_subscriber = message_filters.Subscriber("imu_data", Imu)
+        depth_subscriber = message_filters.Subscriber("depth", Depth)
+        self.ts = message_filters.TimeSynchronizer([joystick_subscriber, imu_subscriber, depth_subscriber], 10)
         self.ts.registerCallback(self.control_callback)
         # self.pid_roll = PID(2, 0, 0)
 
@@ -83,31 +87,47 @@ class Control:
         if x < lower_limit: x = lower_limit
         return x
 
-    def control_callback(self, joystick_msg, navigation_msg):
+    def control_callback(self, joystick_msg, imu_msg, depth_msg):
 
-        short_buttons = joystick_msg.Short
-        long_buttons = joystick_msg.Long
-        pressed_buttons = joystick_msg.pressed_buttons
+        print(joystick_msg)
 
-        A_active = bool((pressed_buttons >> 0) & 0b0000000000000001)
-        D_active = bool((pressed_buttons >> 3) & 0b0000000000000001)
-        R_active = bool((pressed_buttons >> 8) & 0b0000000000000001)
-        L_active = bool((pressed_buttons >> 7) & 0b0000000000000001)
+        tangage_mode = (joystick_msg.status & 0b0000000000000001)
+        yaw_mode = (joystick_msg.status & 0b0000000000000010) >> 1
+        hand_mode = (joystick_msg.status & 0b0000000000001100) >> 2
+        speed_mode = (joystick_msg.status & 0b0000000000110000) >> 4
+        light_mode = (joystick_msg.status & 0b0000000011000000) >> 6
+        stabilization_mode = (joystick_msg.status & 0b0000000100000000) >> 8
+        lock_mode = (joystick_msg.status & 0b0000001000000000) >> 9
+        lx = joystick_msg.lx
+        ly = joystick_msg.ly
+        rx = joystick_msg.rx
+        ry = joystick_msg.ry
 
-        if A_active:
+        depth = depth_msg.value
+
+        # short_buttons = joystick_msg.Short
+        # long_buttons = joystick_msg.Long
+        # pressed_buttons = joystick_msg.pressed_buttons
+
+        # A_active = bool((pressed_buttons >> 0) & 0b0000000000000001)
+        # D_active = bool((pressed_buttons >> 3) & 0b0000000000000001)
+        # R_active = bool((pressed_buttons >> 8) & 0b0000000000000001)
+        # L_active = bool((pressed_buttons >> 7) & 0b0000000000000001)
+
+        if hand_mode == 0:
             self.power_hand.data = 1148
-        elif D_active:
+        elif hand_mode == 2:
             self.power_hand.data = 1832
         else:
             self.power_hand.data = 1484
 
-        speed_mode = joystick_msg.SpeedMode
-        light_mode = joystick_msg.LightMode
+        # speed_mode = joystick_msg.SpeedMode
+        # light_mode = joystick_msg.LightMode
 
-        lx = Control.map(joystick_msg.left_x, 0, 1023, -100, 100)
-        ly = Control.map(joystick_msg.left_y, 0, 1023, -100, 100)
-        rx = Control.map(joystick_msg.right_x, 0, 1023, -100, 100)
-        ry = Control.map(joystick_msg.right_y, 0, 1023, -100, 100)
+        # lx = Control.map(joystick_msg.left_x, 0, 1023, -100, 100)
+        # ly = Control.map(joystick_msg.left_y, 0, 1023, -100, 100)
+        # rx = Control.map(joystick_msg.right_x, 0, 1023, -100, 100)
+        # ry = Control.map(joystick_msg.right_y, 0, 1023, -100, 100)
 
         divisor = 1
         if speed_mode == 0:
@@ -117,15 +137,15 @@ class Control:
         elif speed_mode == 2:
             divisor = 1
 
-        stabilization_on = not (joystick_msg.State & 0b00000001)
-        self.serial_frame["data"][6] = (joystick_msg.State & 0b00000010) >> 1
+        # stabilization_on = not (joystick_msg.State & 0b00000001)
+        self.serial_frame["data"][6] = lock_mode
         
-        yaw_on = (joystick_msg.State & 0b00001000) >> 3
-        tangage_on = (joystick_msg.State & 0b00010000) >> 4
+        # yaw_on = (joystick_msg.State & 0b00001000) >> 3
+        # tangage_on = (joystick_msg.State & 0b00010000) >> 4
 
-        lx = int(lx * divisor) if tangage_on else 0
+        lx = int(lx * divisor) if tangage_mode else 0
         ly = int(ly * divisor)
-        rx = int(rx * divisor) if yaw_on else 0
+        rx = int(rx * divisor) if yaw_mode else 0
         ry = int(ry * divisor)
 
         # State
@@ -150,24 +170,17 @@ class Control:
         self.serial_frame["data"][5] = light_mode
 
         pitch, roll, yaw = euler_from_quaternion([
-           navigation_msg.pose.orientation.x,
-           navigation_msg.pose.orientation.y,
-           navigation_msg.pose.orientation.z,
-           navigation_msg.pose.orientation.w
+           imu_msg.orientation.x,
+           imu_msg.orientation.y,
+           imu_msg.orientation.z,
+           imu_msg.orientation.w
         ])
 
         roll = roll * 57.2958
         pitch = pitch * 57.2958
         yaw = yaw * 57.2958
-
-        q0 = navigation_msg.pose.orientation.w
-        q1 = navigation_msg.pose.orientation.x
-        q2 = navigation_msg.pose.orientation.y
-        q3 = navigation_msg.pose.orientation.z
-
         
         dt = rospy.Time.now() - self.t
-
 
         vertical_left_params = rospy.get_param('vertical_left')
         vertical_right_params = rospy.get_param('vertical_right')
@@ -188,10 +201,10 @@ class Control:
         self.pid_depth.set_target(depth_gains['target'])
         self.pid_pitch.set_target(pitch_gains['target'])
 
-        if stabilization_on:
+        if stabilization_mode:
             if lx in range(-12, 13) and ly in range(-12, 13):
                 pitch_power = self.pid_pitch.control(pitch, dt)
-                depth_power = -self.pid_depth.control(navigation_msg.pose.position.z, dt)
+                depth_power = -self.pid_depth.control(depth, dt)
                 # depth_power = 0
                 # rospy.loginfo("depth_power %f | pitch_power %f, pitch %f" , depth_power , pitch_power, pitch)
                 print(round(pitch, 2), round(pitch_power, 2), round(depth_power, 2))

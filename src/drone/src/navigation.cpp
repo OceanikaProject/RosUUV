@@ -7,6 +7,9 @@
 #include "drone/MadgwickFilter.h"
 #include "drone/ComplementaryFilter.h"
 
+#include "sensor_msgs/MagneticField.h"
+#include "drone/Depth.h"
+
 
 #define I2C_BUS "/dev/i2c-1"
 
@@ -27,29 +30,31 @@ int main(int argc, char **argv)
 
     I2C i2c1((char*) I2C_BUS);
 
-    ros::init(argc, argv, "talker");
+    ros::init(argc, argv, "navigation_module");
     ros::NodeHandle n;
-    ros::Publisher pub = n.advertise<geometry_msgs::PoseStamped>("navigation_module", 2);
+    // ros::Publisher pub = n.advertise<geometry_msgs::PoseStamped>("navigation_module", 2);
     ros::Publisher imu_pub = n.advertise<sensor_msgs::Imu>("/imu_data", 2);
+    ros::Publisher depth_pub = n.advertise<drone::Depth>("/depth", 2);
 
     ros::Rate loop_rate(100);
 
-    const bool DEBUG = n.hasParam("/talker_node/DEBUG");
-    const bool CALIBRATED = n.hasParam("/talker_node/CALIBRATED");
+    const bool DEBUG = n.hasParam("/inertial_navigation/DEBUG");
+    const bool CALIBRATED = n.hasParam("/inertial_navigation/CALIBRATED");
     
 
-    static ros::Publisher acceleration_pub;
-    static ros::Publisher rotation_pub;
-    static ros::Publisher magnetism_pub;
+    // static ros::Publisher acceleration_pub;
+    // static ros::Publisher rotation_pub;
+    // static ros::Publisher magnetism_pub;
+    static ros::Publisher mf_pub;
     static ros::Publisher euler_pub;
     
 
    if (DEBUG)
    {
-        acceleration_pub = n.advertise<geometry_msgs::Vector3>("acceleration", 1000);
-        rotation_pub = n.advertise<geometry_msgs::Vector3>("rotation", 1000);
-        magnetism_pub = n.advertise<geometry_msgs::Vector3>("magnetism", 1000);
-        euler_pub = n.advertise<geometry_msgs::Vector3>("euler", 1000);
+        // acceleration_pub = n.advertise<geometry_msgs::Vector3>("acceleration", 1000);
+        // rotation_pub = n.advertise<geometry_msgs::Vector3>("rotation", 1000);
+        mf_pub = n.advertise<sensor_msgs::MagneticField>("/magnetic_field", 2);
+        euler_pub = n.advertise<geometry_msgs::Vector3>("/euler", 1000);
    }
 
 
@@ -131,29 +136,35 @@ int main(int argc, char **argv)
         ahrs.update(gx, gy, gz, ax, ay, az, mx, my, mz, dt);
         time_moment = ros::Time::now().toSec();
 
-        geometry_msgs::PoseStamped msg;
+        // geometry_msgs::PoseStamped msg;
         sensor_msgs::Imu imu_msg;
+        drone::Depth depth_msg;
 
         if (DEBUG)
         {
-            geometry_msgs::Vector3 acceleration_msg;
-            geometry_msgs::Vector3 rotation_msg;
-            geometry_msgs::Vector3 magnetism_msg;
+            // geometry_msgs::Vector3 acceleration_msg;
+            // geometry_msgs::Vector3 rotation_msg;
+            // geometry_msgs::Vector3 magnetism_msg;
+            sensor_msgs::MagneticField mf_msg;
             geometry_msgs::Vector3 euler_msg;
 
-            acceleration_msg.x = ax;
-            acceleration_msg.y = ay;
-            acceleration_msg.z = az;
+            // acceleration_msg.x = ax;
+            // acceleration_msg.y = ay;
+            // acceleration_msg.z = az;
 
-            rotation_msg.x = gx;
-            rotation_msg.y = gy;
-            rotation_msg.z = gz;
+            // rotation_msg.x = gx;
+            // rotation_msg.y = gy;
+            // rotation_msg.z = gz;
 
-            magnetism_msg.x = mx;
-            magnetism_msg.y = my;
-            magnetism_msg.z = mz;
+            // magnetism_msg.x = mx;
+            // magnetism_msg.y = my;
+            // magnetism_msg.z = mz;
 
-            float heading = atan2(my, mx) * 180 / 3.14;
+            // float heading = atan2(my, mx) * 180 / 3.14;
+
+            mf_msg.magnetic_field.x = mx;
+            mf_msg.magnetic_field.y = my;
+            mf_msg.magnetic_field.z = mz;
 
             euler_msg.x = ahrs.getRoll();
             euler_msg.y = ahrs.getPitch();
@@ -163,9 +174,9 @@ int main(int argc, char **argv)
             // if (yaw <= 0) yaw += 360; 
             euler_msg.z = yaw;
 
-            acceleration_pub.publish(acceleration_msg);
-            rotation_pub.publish(rotation_msg);
-            magnetism_pub.publish(magnetism_msg);
+            // acceleration_pub.publish(acceleration_msg);
+            // rotation_pub.publish(rotation_msg);
+            mf_pub.publish(mf_msg);
             euler_pub.publish(euler_msg);
         }
         // cout << dt << endl;
@@ -190,16 +201,19 @@ int main(int argc, char **argv)
 
         imu_msg.linear_acceleration_covariance = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-        msg.pose.orientation.w = ahrs.q[0];
-        msg.pose.orientation.x = ahrs.q[1];
-        msg.pose.orientation.y = ahrs.q[2];
-        msg.pose.orientation.z = ahrs.q[3];
+        depth_msg.value = bar.getDepth();
 
-        msg.pose.position.x = 0;
-        msg.pose.position.y = 0;
-        msg.pose.position.z = bar.getDepth();
+        // msg.pose.orientation.w = ahrs.q[0];
+        // msg.pose.orientation.x = ahrs.q[1];
+        // msg.pose.orientation.y = ahrs.q[2];
+        // msg.pose.orientation.z = ahrs.q[3];
 
-        pub.publish(msg);
+        // msg.pose.position.x = 0;
+        // msg.pose.position.y = 0;
+        // msg.pose.position.z = bar.getDepth();
+
+        // pub.publish(msg);
+        depth_pub.publish(depth_msg);
         imu_pub.publish(imu_msg);
         ros::spinOnce();
         loop_rate.sleep();

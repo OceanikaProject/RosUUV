@@ -59,6 +59,7 @@ add_message_files(
   Joystick.msg
   Powers.msg
   Teleop.msg
+  Depth.msg
 )
 
 ## Generate services in the 'srv' folder

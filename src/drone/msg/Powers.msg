@@ -1,4 +1,4 @@
-std_msgs/Header Header
+std_msgs/Header header
 int8 left_alt_power
 int8 right_alt_power
 int8 left_heading_power
