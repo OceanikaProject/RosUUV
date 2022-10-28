@@ -11,12 +11,12 @@ def move(req):
     rospy.sleep(req.duration)
     rospy.set_param("/forward/power", 0)
 
-    r = rospy.Rate(10)
+    # r = rospy.Rate(10)
 
-    for i in range(int(req.duration * 10)):
-        rospy.set_param("/up/power", req.power)
-        r.sleep()
-    rospy.set_param("/up/power", 0)
+    # for i in range(int(req.duration * 10)):
+    #     rospy.set_param("/up/power", req.power)
+    #     r.sleep()
+    # rospy.set_param("/up/power", 0)
 
 
 def move_forward_server():
